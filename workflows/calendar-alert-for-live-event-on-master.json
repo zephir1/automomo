@@ -1,5 +1,10 @@
 {
-  "name": "Flow Apuntes",
+  "updatedAt": "2025-10-28T23:05:42.000Z",
+  "createdAt": "2025-10-24T09:40:02.607Z",
+  "id": "jNENotoOCHpWRKSn",
+  "name": "calendar - alert for live event on master",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -17,15 +22,15 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        880,
-        -380
+        240,
+        0
       ],
-      "id": "0b2ca146-aaff-4659-905b-f3ef4e2ba550",
+      "id": "e563f2e1-0bc5-4574-9e54-04387e553921",
       "name": "Get many events",
       "credentials": {
         "googleCalendarOAuth2Api": {
-          "id": "TBzDaoZhNGaeS2Rx",
-          "name": "Google Calendar account"
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
         }
       }
     },
@@ -46,10 +51,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        640,
-        -380
+        0,
+        0
       ],
-      "id": "24661d41-4f5b-43e0-b782-92ab6e7420dc",
+      "id": "37dda2de-335e-45e7-823f-c994d2aa6a65",
       "name": "Schedule Trigger"
     },
     {
@@ -74,15 +79,15 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1080,
-        -380
+        448,
+        0
       ],
-      "id": "10d53865-353a-464d-be84-6a16123ac38c",
+      "id": "bf9a9097-bddb-4c8b-9232-124d51492647",
       "name": "Create file from text",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "taAOGneix72lZ46M",
-          "name": "Google Drive account"
+          "id": "MF7kuDreTfqXRssl",
+          "name": "Google Drive account - bigmomo"
         }
       }
     },
@@ -98,21 +103,20 @@
       "type": "n8n-nodes-base.googleChat",
       "typeVersion": 1,
       "position": [
-        1280,
-        -380
+        640,
+        0
       ],
-      "id": "725dc45c-1f01-4a92-a2bb-da11c7b0b298",
+      "id": "73cf011e-42b1-45ae-bd78-a27a2984b285",
       "name": "Create a message",
       "webhookId": "b0487001-82f0-4449-9326-66b04365e6b9",
       "credentials": {
         "googleChatOAuth2Api": {
-          "id": "Esxz46GfzsFLuBWz",
-          "name": "Chat account"
+          "id": "IFnWz2tLu6qK6Oa2",
+          "name": "Chat account - bigmomo"
         }
       }
     }
   ],
-  "pinData": {},
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -148,15 +152,81 @@
       ]
     }
   },
-  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "8vgwakbL7IcugV2b",
+    "timeSavedPerExecution": 5
   },
-  "versionId": "ae91773a-f334-4d05-aa6b-6b3f855f9485",
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "84465f7406dd5b864dcbddc55a5f7119c6fc82eee988fb191497ce9cc21ee4e2"
+    "templateCredsSetupCompleted": true
   },
-  "id": "Ux8epDHMHUkx9h3X",
+  "pinData": {},
+  "versionId": "81ee2f39-ebaf-47a9-9cc1-cf2149d0a192",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-24T09:40:02.651Z",
+      "createdAt": "2025-10-24T09:40:02.651Z",
+      "role": "workflow:owner",
+      "workflowId": "jNENotoOCHpWRKSn",
+      "projectId": "rGXkia6aVrtkTfUq",
+      "project": {
+        "updatedAt": "2025-10-24T08:08:37.228Z",
+        "createdAt": "2025-10-24T07:52:07.826Z",
+        "id": "rGXkia6aVrtkTfUq",
+        "name": "Cristian Alcaraz <cristian.alcaraz@bigmomo.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-10-24T07:52:07.831Z",
+            "createdAt": "2025-10-24T07:52:07.831Z",
+            "userId": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+            "projectId": "rGXkia6aVrtkTfUq",
+            "user": {
+              "updatedAt": "2025-11-02T08:31:59.000Z",
+              "createdAt": "2025-10-24T07:52:07.819Z",
+              "id": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+              "email": "cristian.alcaraz@bigmomo.com",
+              "firstName": "Cristian",
+              "lastName": "Alcaraz",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-10-24T08:11:22.497Z",
+                "personalization_survey_n8n_version": "1.116.2",
+                "companySize": "<20",
+                "companyType": "digital-agency",
+                "role": "business-owner",
+                "reportedSource": "friend"
+              },
+              "settings": {
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "JUSYRbe45rvkCWkk",
+                "userActivated": true,
+                "userActivatedAt": 1761301408633,
+                "npsSurvey": {
+                  "waitingForResponse": true,
+                  "ignoredCount": 1,
+                  "lastShownAt": 1761687179598
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": true,
+              "lastActiveAt": "2025-11-01",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": []
 }

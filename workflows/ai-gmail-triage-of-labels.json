@@ -1,0 +1,309 @@
+{
+  "updatedAt": "2025-10-28T23:04:59.000Z",
+  "createdAt": "2025-10-24T09:35:58.251Z",
+  "id": "JUSYRbe45rvkCWkk",
+  "name": "(ai) gmail - triage of labels",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Categorize this email:\n**ID:** {{ $json.id }}\n**ThreadID:** {{ $json.threadId }}\n**From:** {{ $json.From }}\n**To:** {{ $json.To }}\n**Subject:** {{ $json.Subject }}\n**Snippet:** {{ $json.snippet }}\n**Labels:** {{ $json.labels[0].name }}, {{ $json.labels[1].name }}, {{ $json.labels[2].name }}",
+        "options": {
+          "systemMessage": "You are an email categorization assistant. Your task is to analyze emails and apply appropriate labels to help organize the user's inbox.\n\nYou have access to two tools:\n1. **Get all Labels** - Retrieves available email labels\n2. **Add Labels** - Applies labels to emails\n3. **Get message** - Reads the content of a message given an ID\n\n### Instructions:\n- First, always use \"Get all Labels\" to see available categories.\n- Never use this label IDs: INBOX, SENT, CHAT, TRASH, DRAFT, SPAM, CATEGORIES, CATEGORY_FORUMS, CATEGORY_UPDATES, CATEGORY_PROMOTIONS, CATEGORY_SOCIAL, UNREAD, YELLOW_STAR, STARRED, Label_2\n- Analyze email content for: subject, sender, keywords, and context\n- If necessary, read the complete email using Get Message (not only the snippet)\n- Apply only most relevant label per email\n- Be consistent in categorization patterns\n- If unsure between labels, choose the most specific one\n\n### Response Format:\n1. Brief summary of email content (1 sentence)\n2. Chosen labels with reasoning\n3. Use \"Add Labels\" tool with selected labels\n\nBe efficient and accurate. Focus on helping the user maintain an organized inbox."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "ea6a41d5-5135-4a68-a6e0-e1739c802703",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', `Array of Gmail label ids to add. Use the id field from the \"Get all labels\" tool`, 'string') }}"
+      },
+      "id": "c40d97c2-dd80-450b-a662-e01b6792cbdd",
+      "name": "Add Label",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        224
+      ],
+      "webhookId": "e7289911-d937-45bd-9e91-410a0dc959f8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to get all existing labels from Gmail",
+        "resource": "label",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        576,
+        224
+      ],
+      "id": "cab6834e-75a3-4552-8913-d62b9a533677",
+      "name": "Get all Labels",
+      "webhookId": "291b9995-7ae1-4f65-9ffb-ba62c980b829",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {
+          "maxOutputTokens": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        224
+      ],
+      "id": "75fd2b00-306d-44a2-93b2-0c65457046d2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4opOWz4CcbsKpSMm",
+          "name": "Google Gemini(PaLM) Api - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "includeSpamTrash": false,
+          "includeDrafts": false,
+          "readStatus": "=unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3e69be81-d59a-49f4-bc07-fc407617db51",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        224
+      ],
+      "id": "daae125e-53b8-49b7-bce5-59ce5c6a5df2",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', `id of the gmail message, like 1944fdc33f544369`, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        224
+      ],
+      "id": "2522b2e3-56db-49ff-8728-7106d47f9d95",
+      "name": "Get a message in Gmail",
+      "webhookId": "eba62e72-fe7c-46ea-8936-a23b75bc0486",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Label": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 1
+  },
+  "staticData": {
+    "node:Gmail Trigger": {
+      "Gmail Trigger": {
+        "lastTimeChecked": 1762122712,
+        "possibleDuplicates": [
+          "19a46b2df26e22ef",
+          "19a4689818814542"
+        ]
+      }
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "125a2980-02e1-4fd3-83c9-e86b4fb33db5",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-24T09:35:58.262Z",
+      "createdAt": "2025-10-24T09:35:58.262Z",
+      "role": "workflow:owner",
+      "workflowId": "JUSYRbe45rvkCWkk",
+      "projectId": "rGXkia6aVrtkTfUq",
+      "project": {
+        "updatedAt": "2025-10-24T08:08:37.228Z",
+        "createdAt": "2025-10-24T07:52:07.826Z",
+        "id": "rGXkia6aVrtkTfUq",
+        "name": "Cristian Alcaraz <cristian.alcaraz@bigmomo.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-10-24T07:52:07.831Z",
+            "createdAt": "2025-10-24T07:52:07.831Z",
+            "userId": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+            "projectId": "rGXkia6aVrtkTfUq",
+            "user": {
+              "updatedAt": "2025-11-02T08:31:59.000Z",
+              "createdAt": "2025-10-24T07:52:07.819Z",
+              "id": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+              "email": "cristian.alcaraz@bigmomo.com",
+              "firstName": "Cristian",
+              "lastName": "Alcaraz",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-10-24T08:11:22.497Z",
+                "personalization_survey_n8n_version": "1.116.2",
+                "companySize": "<20",
+                "companyType": "digital-agency",
+                "role": "business-owner",
+                "reportedSource": "friend"
+              },
+              "settings": {
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "JUSYRbe45rvkCWkk",
+                "userActivated": true,
+                "userActivatedAt": 1761301408633,
+                "npsSurvey": {
+                  "waitingForResponse": true,
+                  "ignoredCount": 1,
+                  "lastShownAt": 1761687179598
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": true,
+              "lastActiveAt": "2025-11-01",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
