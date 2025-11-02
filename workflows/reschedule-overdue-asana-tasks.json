@@ -1,0 +1,288 @@
+{
+  "name": "Reschedule overdue Asana tasks",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "id": "9262720e-2beb-4426-a472-3d7bf8bc28af",
+      "name": "Everyday at 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        420,
+        520
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "assignee": "cristian.alcaraz@bigmomo.com",
+          "workspace": "43540521088120",
+          "completed_since": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+        }
+      },
+      "id": "0d074451-5d61-4ed4-86a8-f6cdf002e84b",
+      "name": "Get user tasks",
+      "type": "n8n-nodes-base.asana",
+      "position": [
+        660,
+        520
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "asanaApi": {
+          "id": "MrA7CHjoIZfRrGQ6",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "id": "={{ $json.gid }}"
+      },
+      "id": "14939268-9bda-4fc1-9fef-aa6a74c2365a",
+      "name": "Get task infos",
+      "type": "n8n-nodes-base.asana",
+      "position": [
+        880,
+        520
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "asanaApi": {
+          "id": "MrA7CHjoIZfRrGQ6",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "145d9367-7662-4ed9-8195-bf9b35c78d6b",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.completed }}",
+              "rightValue": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7d9a37c-66b7-46b9-b228-7372cb0d7b09",
+      "name": "Task is open?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1120,
+        520
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "dbecabb3-8075-4cc0-94af-b678c8af8f66",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              },
+              "leftValue": "={{ $json.due_on.replaceAll(\"-\",\"\") }}",
+              "rightValue": "={{ DateTime.now().format('yyyyMMdd') }}"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "11ae0bbb-8d76-4623-9a24-2c2a36600dd3",
+      "name": "Due date in the past?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1360,
+        400
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ $json.gid }}",
+        "otherProperties": {
+          "due_on": "={{ DateTime.now().format('yyyy-MM-dd') }}"
+        }
+      },
+      "id": "282d79c7-e74a-4249-ad37-b4d81655a206",
+      "name": "Set due date to Today",
+      "type": "n8n-nodes-base.asana",
+      "position": [
+        1620,
+        360
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "asanaApi": {
+          "id": "MrA7CHjoIZfRrGQ6",
+          "name": "Asana account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "spaceId": "spaces/AAQAmMDYSNw",
+        "messageUi": {
+          "text": "🗄️ Todas las tareas pasadas han sido asignadas a hoy."
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        360
+      ],
+      "id": "d7e6992f-8944-4b43-be69-c5f9c2db3b51",
+      "name": "Google Chat",
+      "webhookId": "b1a56158-b1ee-4c25-8857-3931a57273db",
+      "executeOnce": true,
+      "credentials": {
+        "googleChatOAuth2Api": {
+          "id": "Esxz46GfzsFLuBWz",
+          "name": "Chat account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### ⚙️ Set Up \n\n1. Add your **Asana** credentials\n2. Schedule the workflow to run at desired intervals (e.g., daily or weekly).\n3. Select your **Workspace Name** and your **Assignee Name** (user) in the **Get user tasks** node\n4. *(Optional) Tailor filtering conditions to match your preferred due-date rules and removal criteria.*\n5. **Activate the workflow** and watch your Asana workspace stay up to date and clutter-free.",
+        "height": 240,
+        "width": 640,
+        "color": 5
+      },
+      "id": "f4aafa1f-8c5b-4fd1-9aca-fd096508dbfb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        380,
+        240
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Task is open?": {
+      "main": [
+        [
+          {
+            "node": "Due date in the past?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get task infos": {
+      "main": [
+        [
+          {
+            "node": "Task is open?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get user tasks": {
+      "main": [
+        [
+          {
+            "node": "Get task infos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Everyday at 7am": {
+      "main": [
+        [
+          {
+            "node": "Get user tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Due date in the past?": {
+      "main": [
+        [
+          {
+            "node": "Set due date to Today",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set due date to Today": {
+      "main": [
+        [
+          {
+            "node": "Google Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "Europe/Madrid",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "errorWorkflow": "pY4WNHSxGafwywEo",
+    "timeSavedPerExecution": 5
+  },
+  "versionId": "75dbe4c9-f1a5-477f-9c1d-756bb4b3e3b1",
+  "meta": {
+    "templateId": "2701",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84465f7406dd5b864dcbddc55a5f7119c6fc82eee988fb191497ce9cc21ee4e2"
+  },
+  "id": "iN0NKilGvzOYNEzn",
+  "tags": []
+}

@@ -1,0 +1,117 @@
+{
+  "name": "Downtime Monkey Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "spaceId": "spaces/AAQATBvNaMc",
+        "messageUi": {
+          "text": "=⚡ Downtime Monkey Alert\n{{ $json.snippet }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        100,
+        -120
+      ],
+      "id": "d84e5229-a455-44f5-9fdf-fed6160254f6",
+      "name": "Create a message",
+      "webhookId": "5dc9be51-6108-4e95-b138-071ff4c629b5",
+      "credentials": {
+        "googleChatOAuth2Api": {
+          "id": "Esxz46GfzsFLuBWz",
+          "name": "Chat account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        -120
+      ],
+      "id": "ff82e3bc-81e8-4a9c-9c4f-937939a4a0fd",
+      "name": "Delete a message",
+      "webhookId": "1e55c81f-f807-4770-9af6-027c5e848b35",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JPmkZpcYx2mv1Me4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": "monitor@downtimemonkey.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        -120
+      ],
+      "id": "295e7b30-6d6c-4e8c-9fb1-bdf0ef8ad0a6",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JPmkZpcYx2mv1Me4",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create a message": {
+      "main": [
+        [
+          {
+            "node": "Delete a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 1
+  },
+  "versionId": "61606787-e207-413b-8290-57f23d3ed6a7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84465f7406dd5b864dcbddc55a5f7119c6fc82eee988fb191497ce9cc21ee4e2"
+  },
+  "id": "V9fm4WrkPHzBX645",
+  "tags": []
+}

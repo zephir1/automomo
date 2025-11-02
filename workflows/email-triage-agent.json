@@ -1,0 +1,175 @@
+{
+  "name": "Email Triage Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Categorize this email:\n\n**From:** {{ $json.From }}\n**Subject:** {{ $json.Subject }}\n**Content:** \n{{ $json.snippet }}\n\nPlease analyze this email and apply appropriate labels using the available tools.",
+        "options": {
+          "systemMessage": "You are an email categorization assistant. Your task is to analyze emails and apply appropriate labels to help organize the user's inbox.\n\nYou have access to two tools:\n1. **Get all Labels** - Retrieves available email labels\n2. **Add Labels** - Applies labels to emails\n\n### Instructions:\n- First, always use \"Get all Labels\" to see available categories: do not use this label ID: INBOX, SENT, CHAT, TRASH, DRAFT, SPAM, CATEGORIES, CATEGORY_FORUMS, CATEGORY_UPDATES, CATEGORY_PROMOTIONS, CATEGORY_SOCIAL, UNREAD, YELLOW_STAR, STARRED, Label_2\n- Analyze email content for: subject, sender, keywords, and context\n- Apply 1-2 most relevant labels per email\n- Be consistent in categorization patterns\n- If unsure between labels, choose the most specific one\n\n### Response Format:\n1. Brief summary of email content (1 sentence)\n2. Chosen labels with reasoning\n3. Use \"Add Labels\" tool with selected labels\n\nBe efficient and accurate. Focus on helping the user maintain an organized inbox."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        160
+      ],
+      "id": "8923c4b5-7812-43fc-9c4d-076f2ee04b41",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": "={{ $fromAI('Label_Names_or_IDs', 'Array of Gmail label ids to add. Use the id field from the \"Get all labels\" tool', 'string').split(',') }}"
+      },
+      "id": "d5200737-6355-42b6-b3bf-db24e94d12d0",
+      "name": "Add Label",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1420,
+        380
+      ],
+      "webhookId": "e7289911-d937-45bd-9e91-410a0dc959f8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JPmkZpcYx2mv1Me4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to get all existing labels from Gmail",
+        "resource": "label",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        380
+      ],
+      "id": "500d51d4-fef3-40eb-9ca2-722dd140ad2c",
+      "name": "Get all Labels",
+      "webhookId": "291b9995-7ae1-4f65-9ffb-ba62c980b829",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JPmkZpcYx2mv1Me4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        380
+      ],
+      "id": "92309b17-0331-449b-9e8b-e269f83d53bf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GrTq2yqgFzLOwLq9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "=unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1080,
+        160
+      ],
+      "id": "b009fe9a-3fc3-4370-bf5e-5aaf99af5cc7",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JPmkZpcYx2mv1Me4",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Label": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 1
+  },
+  "versionId": "5ba3e4bf-6585-475c-ad96-9bd9398b4a07",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84465f7406dd5b864dcbddc55a5f7119c6fc82eee988fb191497ce9cc21ee4e2"
+  },
+  "id": "OAFgQCzhmjQSFcm0",
+  "tags": []
+}
