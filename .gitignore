@@ -4,6 +4,9 @@
 config/.env
 config/.env.encrypted
 config/n8n_api_key.txt
+config/config.json
+config/config.encrypted
+config/.encryption_key
 *.key
 
 # Python
