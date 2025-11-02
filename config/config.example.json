@@ -1,0 +1,14 @@
+{
+  "n8n": {
+    "url": "https://automomo.bigmomo.com",
+    "api_key": "TU_API_KEY_AQUI"
+  },
+  "encryption": {
+    "enabled": true,
+    "key_file": "config/.encryption_key"
+  },
+  "git": {
+    "auto_commit": false,
+    "commit_message_prefix": "[automomo]"
+  }
+}
