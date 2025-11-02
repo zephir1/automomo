@@ -44,9 +44,11 @@ class WorkflowDeployer:
         workflow_name = local_workflow.get('name', 'unnamed')
         file_path = local_workflow.get('_file_path')
         
-        # Remove metadata before deploying
+        # Remove metadata and fields that n8n doesn't accept in updates
+        excluded_fields = ['_file_path', 'id', 'createdAt', 'updatedAt', 'versionId', 
+                          'triggerCount', 'shared', 'isArchived']
         deploy_data = {k: v for k, v in local_workflow.items() 
-                      if not k.startswith('_')}
+                      if k not in excluded_fields}
         
         # Check if workflow exists in n8n
         existing = remote_workflows.get(workflow_name)
@@ -73,13 +75,14 @@ class WorkflowDeployer:
             
             # Update existing workflow
             try:
-                # Keep the same ID and some metadata
-                deploy_data['id'] = workflow_id
+                # Don't send ID in the body, it's in the URL
                 self.client.update_workflow(workflow_id, deploy_data)
                 print(f"✅ Actualizado: {workflow_name} (ID: {workflow_id})")
                 return True
             except Exception as e:
                 print(f"❌ Error actualizando {workflow_name}: {e}")
+                import traceback
+                traceback.print_exc()
                 return False
         else:
             if dry_run:
