@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-04T14:52:34.000Z",
+  "updatedAt": "2025-11-04T19:58:38.000Z",
   "createdAt": "2025-11-02T21:18:35.053Z",
   "id": "cGKgzn4cs6RfgQJB",
   "name": "n8n - backup to git",
@@ -348,7 +348,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Código JavaScript para añadir al nodo \"Convert Name to Kebab-Case\" en n8n\n// Este nodo debe ir entre \"Loop Over Items\" y \"GitHub\"\n\n// Convert workflow name to kebab-case for filename\nconst item = $input.item.json;\n\nfunction nameToKebabCase(name) {\n  // Remove parentheses\n  let result = name.replace(/[()]/g, '');\n  // Replace multiple spaces/underscores with single space\n  result = result.replace(/[\\s_]+/g, ' ');\n  // Convert to lowercase and replace spaces with hyphens\n  result = result.trim().toLowerCase().replace(/ /g, '-');\n  // Replace multiple consecutive hyphens with single hyphen\n  result = result.replace(/-+/g, '-');\n  // Remove any remaining special characters except hyphens\n  result = result.replace(/[^a-z0-9-]/g, '');\n  return result;\n}\n\nitem.kebabName = nameToKebabCase(item.name);\n\n// Generate JSON formatted with indentation\nitem.formattedJson = JSON.stringify(item, null, 2);\n\nreturn { json: item };\n"
+        "jsCode": "// Código JavaScript para añadir al nodo \"Convert Name to Kebab-Case\" en n8n\n// Este nodo debe ir entre \"Loop Over Items\" y \"GitHub\"\n\n// Convert workflow name to kebab-case for filename\nconst item = $input.item.json;\n\nfunction nameToKebabCase(name) {\n  // Remove parentheses\n  let result = name.replace(/[()]/g, '');\n  // Replace multiple spaces/underscores with single space\n  result = result.replace(/[\\s_]+/g, ' ');\n  // Convert to lowercase and replace spaces with hyphens\n  result = result.trim().toLowerCase().replace(/ /g, '-');\n  // Replace multiple consecutive hyphens with single hyphen\n  result = result.replace(/-+/g, '-');\n  // Remove any remaining special characters except hyphens\n  result = result.replace(/[^a-z0-9-]/g, '');\n  return result;\n}\n\n// Clean up fields we don't want to version control\n// Remove nested project data from shared array\nif (item.shared && Array.isArray(item.shared)) {\n  item.shared = item.shared.map(s => {\n    const cleaned = {...s};\n    delete cleaned.project;  // Remove nested project with user data\n    return cleaned;\n  });\n}\n\n// Create a copy for JSON generation (without kebabName inside)\nconst itemForJson = {...item};\nconst formattedJson = JSON.stringify(itemForJson, null, 2);\n\n// Return with kebabName for filename, but formattedJson doesn't contain it\nitem.kebabName = nameToKebabCase(item.name);\nitem.formattedJson = formattedJson;\n\nreturn { json: item };"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -514,7 +514,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9d9927f0-ec43-4a9d-8947-dbf5d1b980d8",
+  "versionId": "e66f8503-53c0-4d12-bd83-90638a30d959",
   "triggerCount": 1,
   "shared": [
     {
@@ -525,6 +525,5 @@
       "projectId": "rGXkia6aVrtkTfUq"
     }
   ],
-  "tags": [],
-  "kebabName": "n8n-backup-to-git"
+  "tags": []
 }
