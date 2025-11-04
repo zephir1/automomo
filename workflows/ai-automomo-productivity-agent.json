@@ -1,1 +1,1389 @@
-{"updatedAt":"2025-10-28T23:06:58.000Z","createdAt":"2025-10-24T13:19:07.582Z","id":"VuJjt8th71dIyzLA","name":"(ai) automomo - productivity agent","active":true,"isArchived":false,"nodes":[{"parameters":{"sessionIdType":"customKey","sessionKey":"={{ $json.body ? $('Webhook').item.json.body.message.sender.name : $('Telegram Trigger').item.json.message.chat.id }}"},"id":"d7fe0bed-44ec-4c0a-b66f-12e36bf9483d","name":"Simple Memory","type":"@n8n/n8n-nodes-langchain.memoryBufferWindow","position":[1632,304],"typeVersion":1.3},{"parameters":{"sendTo":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}","subject":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}","message":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}","options":{"appendAttribution":false}},"id":"33df9b0d-7bc9-48ed-8664-eece9c875739","name":"Send Email","type":"n8n-nodes-base.gmailTool","position":[2256,1120],"webhookId":"b5692bdd-471a-4141-8710-b0909a433939","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Reply to an email message. AI-configurable parameters: Message_ID (string) - the ID of the message; Message (string) - the reply content; Attachment_Field_Name (string) - input field name containing attachments; BCC (string) - comma-separated BCC recipients; CC (string) - comma-separated CC recipients.","operation":"reply","messageId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}","emailType":"text","message":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}","options":{"appendAttribution":false,"attachmentsUi":{"attachmentsBinary":[{"property":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attachment_Field_Name', ``, 'string') }}"}]},"bccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}","ccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}"}},"id":"55889898-08c6-4357-a448-fd9e7b0a3d29","name":"Reply to an Email","type":"n8n-nodes-base.gmailTool","position":[2352,1184],"webhookId":"3fda5336-8c0d-426c-abf4-e614cadbcc12","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Retrieve multiple email messages based on filters. AI-configurable parameters: Return_All (boolean) - whether to return all matching messages; Search (string) - Gmail query string to filter messages; Received_After (string) - datetime (RFC3339) after which messages are received; Received_Before (string) - datetime before which messages are received; Sender (string) - email address of the sender.","operation":"getAll","returnAll":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}","filters":{"q":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search', ``, 'string') }}","receivedAfter":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Received_After', ``, 'string') }}","receivedBefore":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Received_Before', ``, 'string') }}"}},"id":"6bbe7356-33c4-452b-b6d8-726f7af3a2d2","name":"Get Emails","type":"n8n-nodes-base.gmailTool","position":[2464,1248],"webhookId":"35b2c37f-1e18-4fec-a442-3f672e8d839c","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Add one or more labels to an email message. AI-configurable parameters: Message_ID (string) - the ID of the message to label; Label_Names_or_IDs (string) - comma-separated label names or IDs to apply.","operation":"addLabels","messageId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}","labelIds":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}"},"id":"97f26bc6-f2cd-40fd-9617-c26af6368ad4","name":"Add Label to Email","type":"n8n-nodes-base.gmailTool","position":[2560,1312],"webhookId":"e985e162-2fb5-480a-9c72-5bd5b62876df","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Retrieve a list of labels. AI-configurable parameters: Return_All (boolean) - whether to return all labels.","resource":"label","returnAll":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"},"id":"26dad8fd-c349-433e-a471-71dbfd97c56b","name":"Get Labels","type":"n8n-nodes-base.gmailTool","position":[2656,1264],"webhookId":"4bffaaac-3a2e-4cdb-8809-69a2ea942d7b","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Create an email draft. AI-configurable parameters: Subject (string) - the subject of the draft; Message (string) - the body of the draft; Attachment_Field_Name__in_Input_ (string) - input field name containing attachments; BCC (string) - comma-separated BCC recipients; CC (string) - comma-separated CC recipients.","resource":"draft","subject":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}","emailType":"html","message":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}","options":{"bccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}","ccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}","sendTo":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}"}},"id":"a47d9f12-5973-4a93-81f8-7a7f03a4214b","name":"Draft Email","type":"n8n-nodes-base.gmailTool","position":[2736,1168],"webhookId":"89cfafeb-e670-46e1-a5c2-f0a0e3ad0332","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Draft a reply to an email. Use the thread_id parameter to pass the thread for which the email must be drafted","resource":"draft","subject":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}","emailType":"html","message":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}","options":{"bccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}","ccList":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}","threadId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Thread_ID', ``, 'string') }}"}},"id":"957ea20b-4d3f-4ad4-bbcd-42fdf1a5af82","name":"Draft Email Reply","type":"n8n-nodes-base.gmailTool","position":[2832,1088],"webhookId":"95797251-5c38-45f1-8203-377716c743bd","typeVersion":2.1,"credentials":{"gmailOAuth2":{"id":"81fW20A5QWw8eLph","name":"Gmail account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Check if a slot is available on my calendar","resource":"calendar","calendar":{"__rl":true,"value":"cristian.alcaraz@bigmomo.com","mode":"list","cachedResultName":"cristian.alcaraz@bigmomo.com"},"timeMin":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}","timeMax":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}","options":{"timezone":{"__rl":true,"value":"Europe/Madrid","mode":"list","cachedResultName":"Europe/Madrid"}}},"id":"47e41e13-e6e7-4959-bb08-1f1f4da01b34","name":"Check Availability","type":"n8n-nodes-base.googleCalendarTool","position":[832,1120],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Get future events on Google Calendar","operation":"getAll","calendar":{"__rl":true,"value":"cristian.alcaraz@bigmomo.com","mode":"list","cachedResultName":"cristian.alcaraz@bigmomo.com"},"returnAll":true,"timeMin":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', `Should be a future date and time`, 'string') }}","timeMax":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}","options":{"orderBy":"startTime","recurringEventHandling":"expand","timeZone":{"__rl":true,"value":"Europe/Madrid","mode":"list","cachedResultName":"Europe/Madrid"}}},"id":"bd20eb61-ade0-4b4b-ba89-943dfa11ac05","name":"Get all Events","type":"n8n-nodes-base.googleCalendarTool","position":[928,1200],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Delete Calendar Event","operation":"delete","calendar":{"__rl":true,"value":"cristian.alcaraz@bigmomo.com","mode":"list","cachedResultName":"cristian.alcaraz@bigmomo.com"},"eventId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the event id of the event to delete`, 'string') }}","options":{}},"id":"ace1f669-dd08-48df-81bc-30c852e1424d","name":"Delete Calendar Event","type":"n8n-nodes-base.googleCalendarTool","position":[1008,1312],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Update an event on Google Calendar","operation":"update","calendar":{"__rl":true,"mode":"list","value":"jitesh.com@gmail.com","cachedResultName":"jitesh.com@gmail.com"},"eventId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the id of the event to reschedule or update`, 'string') }}","useDefaultReminders":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}","updateFields":{"attendeesUi":{"values":{"mode":"replace","attendees":["={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"]}},"end":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}","sendUpdates":"all","start":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}"}},"id":"e24ed479-8a75-4c21-9f25-51d603b35574","name":"Reschedule Event","type":"n8n-nodes-base.googleCalendarTool","position":[1136,1328],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Get an event in Google Calendar","operation":"get","calendar":{"__rl":true,"value":"cristian.alcaraz@bigmomo.com","mode":"list","cachedResultName":"cristian.alcaraz@bigmomo.com"},"eventId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the event id`, 'string') }}","options":{}},"id":"8e9a40fd-9f34-44e0-b256-f15eb0a73ba2","name":"Get Event","type":"n8n-nodes-base.googleCalendarTool","position":[1216,1216],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"descriptionType":"manual","toolDescription":"Create an event on Google Calendar","calendar":{"__rl":true,"value":"cristian.alcaraz@bigmomo.com","mode":"list","cachedResultName":"cristian.alcaraz@bigmomo.com"},"start":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}","end":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}","useDefaultReminders":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}","additionalFields":{"description":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}","summary":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}","visibility":"default"}},"id":"991c7d7f-3bcf-4006-8a56-8e606ff49307","name":"Create an event","type":"n8n-nodes-base.googleCalendarTool","position":[1312,1104],"typeVersion":1.3,"credentials":{"googleCalendarOAuth2Api":{"id":"777xDlCIv6BtISa9","name":"Google Calendar account - bigmomo"}}},{"parameters":{"updates":["message"],"additionalFields":{}},"id":"af55b978-143b-424a-9039-887506a91b30","name":"Telegram Trigger","type":"n8n-nodes-base.telegramTrigger","position":[672,-208],"webhookId":"6d90bff2-32dd-44fc-b11b-4217a615dfed","typeVersion":1.2,"credentials":{"telegramApi":{"id":"eXcrR3IJLRzEjs2W","name":"Telegram account - cristian momo bot"}}},{"parameters":{"operation":"getAll","fields":["names","emailAddresses"],"useQuery":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Query', ``, 'boolean') }}","query":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}","rawData":true,"options":{}},"id":"8782f94e-ac80-43d9-9491-ad9c926a3b22","name":"Get Contacts","type":"n8n-nodes-base.googleContactsTool","position":[2800,640],"typeVersion":1,"credentials":{"googleContactsOAuth2Api":{"id":"1Z3XR7jUTY5zSQtH","name":"Google Contacts - bigmomo"}}},{"parameters":{"chatId":"1699724333","text":"={{ $('Set Reply Message').item.json.message.replace(/[_*\\[\\]()~`>#+=\\-|{}.!\\\\]/g, '\\\\$&') }}","additionalFields":{"appendAttribution":false,"parse_mode":"MarkdownV2"}},"id":"c55bbfc0-fab5-47e9-a98a-6cd35cdde48a","name":"Send a text message","type":"n8n-nodes-base.telegram","position":[2784,-224],"webhookId":"84ca051b-0e3c-4311-8117-eca08c4a86fa","typeVersion":1.2,"credentials":{"telegramApi":{"id":"eXcrR3IJLRzEjs2W","name":"Telegram account - cristian momo bot"}}},{"parameters":{"conditions":{"options":{"version":2,"leftValue":"","caseSensitive":true,"typeValidation":"strict"},"conditions":[{"id":"74570957-ff95-4df8-bbc2-043c4973a733","operator":{"name":"filter.operator.equals","type":"string","operation":"equals"},"leftValue":"={{ $json.message.chat.username }}","rightValue":"zephirone"}],"combinator":"and"},"options":{}},"id":"179ee564-930e-441c-83c1-186059367bf6","name":"Only allow me","type":"n8n-nodes-base.filter","position":[880,-208],"typeVersion":2.2},{"parameters":{"assignments":{"assignments":[{"id":"c707ac04-2237-4cc4-991a-6aa22b1cef81","name":"message","type":"string","value":"={{ $json.output || $json.error }}"}]},"options":{}},"id":"08fa5cc0-27a1-4a26-b6b1-518536f4e456","name":"Set Reply Message","type":"n8n-nodes-base.set","position":[2336,-48],"typeVersion":3.4},{"parameters":{},"id":"6354b7fd-c734-414f-b75c-d1aea74bd648","name":"Think","type":"@n8n/n8n-nodes-langchain.toolThink","position":[2016,288],"typeVersion":1.1},{"parameters":{"content":"## Auto Momo 🤖\nYour AI-powered personal assistant.  \n- Orchestrates tasks, calendar, emails, contacts & expenses  \n- Uses memory + OpenAI model for smart decisions  \n- Sends results back to Telegram  ","height":704,"width":720},"id":"e343c81a-8bc3-4378-b43a-d5518108cf21","name":"Sticky Note1","type":"n8n-nodes-base.stickyNote","position":[1472,-32],"typeVersion":1},{"parameters":{"content":"## Gmail MCP 📧\nFull email management.  \n- Send & draft messages  \n- Reply, label, and fetch emails  ","height":640,"width":768,"color":3},"id":"05be19b3-cfdc-43b7-88ab-7b7b4167e0fd","name":"Sticky Note4","type":"n8n-nodes-base.stickyNote","position":[2208,880],"typeVersion":1},{"parameters":{"content":"## Google Contacts MCP 👥\nAccess and manage your contact list.  \n- Fetch contacts for quick communication  ","height":416,"width":448,"color":6},"id":"afd43947-b4a8-412f-82da-62885e2406d5","name":"Sticky Note6","type":"n8n-nodes-base.stickyNote","position":[2608,384],"typeVersion":1},{"parameters":{"content":"## Calendar MCP 📅\nYour scheduling hub.  \n- Check availability  \n- Create, reschedule, or delete events ","height":704,"width":624,"color":5},"id":"efda731e-8751-4a67-b76c-a8bacac92064","name":"Sticky Note3","type":"n8n-nodes-base.stickyNote","position":[800,816],"typeVersion":1},{"parameters":{"content":"## Task Manager MCP ✅\nManages to-dos with ease:  \n- Create / Complete / Delete tasks  \n- Retrieve individual or bulk tasks ","height":624,"width":560,"color":6},"id":"3558db0a-ebe7-4942-9dfb-ad610d59a94b","name":"Sticky Note2","type":"n8n-nodes-base.stickyNote","position":[208,144],"typeVersion":1},{"parameters":{"modelName":"models/gemini-flash-latest","options":{}},"type":"@n8n/n8n-nodes-langchain.lmChatGoogleGemini","typeVersion":1,"position":[1504,240],"id":"240f7612-810c-4876-9261-b8d1310651b7","name":"Google Gemini Chat Model","credentials":{"googlePalmApi":{"id":"4opOWz4CcbsKpSMm","name":"Google Gemini(PaLM) Api - bigmomo"}}},{"parameters":{"workspace":"43540521088120","name":"={{ $fromAI('Title', ``, 'string') }}","otherProperties":{"assignee":"=cristian.alcaraz@bigmomo.com","due_on":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Due_On', `Always use future dates`, 'string') }}","notes":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}"}},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[384,336],"id":"08580662-79f9-482a-86b4-9ad0bf97cfe7","name":"Create a task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"operation":"get","id":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[528,352],"id":"3df181a8-f757-4654-9105-ea9e6d1ca5e1","name":"Get a task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"operation":"delete","id":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[656,368],"id":"9b57c7f9-7d77-4a5d-b020-838ddaf4d335","name":"Delete a task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"operation":"update","id":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}","otherProperties":{"completed":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completed', `Pass the task_id of the task to be completed`, 'boolean') }}"}},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[384,608],"id":"ffc97650-6e1a-423c-b0c6-e0ae85843c1f","name":"Complete a task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"operation":"getAll","limit":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}","filters":{"assignee":"=cristian.alcaraz@bigmomo.com","workspace":"43540521088120","completed_since":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completed_Since', ``, 'string') }}"}},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[256,576],"id":"62bba888-9356-496f-832e-3df24fe325f3","name":"Get many tasks in Asana1","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"operation":"search","workspace":"43540521088120","searchTaskProperties":{"completed":false,"text":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}"}},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[240,304],"id":"1642a750-2cf1-456d-a873-1dd1cfd15512","name":"Search a task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"resource":"project","operation":"getAll","workspace":"43540521088120","limit":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}","additionalFields":{"team":"={{ $fromAI('ID', ``, 'number') }}"}},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[528,576],"id":"2a235bcf-cb62-4819-80a7-c09b0028ff37","name":"Get many projects in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"resource":"user","userId":"={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('User_ID', ``, 'string') }}"},"type":"n8n-nodes-base.asanaTool","typeVersion":1,"position":[656,608],"id":"4ceb847f-c97b-42ec-8893-6304375e0b95","name":"Get a user in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"Asana account - bigmomo"}}},{"parameters":{"httpMethod":"POST","path":"n8n-google-chat","options":{"responseData":"{\"text\": \"🤖 Recibido. Estoy procesando tu solicitud, dame un momento por favor...\"}","responseHeaders":{"entries":[{"name":"Content-Type","value":"application/json"}]}}},"type":"n8n-nodes-base.webhook","typeVersion":2.1,"position":[880,-16],"id":"4d32e0bf-2d18-4f0f-a855-15195c8f5f64","name":"Webhook","webhookId":"0aaec3b4-1258-490b-a947-f09322f0bf99"},{"parameters":{"spaceId":"={{ $('Webhook').item.json.body.message.space.name }}","messageUi":{"text":"={{ $('Set Reply Message').item.json.message }}"},"additionalFields":{}},"type":"n8n-nodes-base.googleChat","typeVersion":1,"position":[2784,-48],"id":"7448cff5-e7ed-43a6-b85b-1c2b622b83a0","name":"Create a message","webhookId":"5ab4fbe6-1cf1-4282-b396-f0d741397a17","credentials":{"googleApi":{"id":"KsbkO5Zn2sEeZIHn","name":"Google Service Account - bigmomo"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"72dab741-c2d4-4057-9c06-96a6eed1426c","leftValue":"={{ $json.body }}","rightValue":"","operator":{"type":"object","operation":"exists","singleValue":true}},{"id":"7180380b-4811-4130-9de0-cd9ab3378ae9","leftValue":"={{ $json.message }}","rightValue":"","operator":{"type":"object","operation":"exists","singleValue":true}}],"combinator":"or"},"options":{}},"type":"n8n-nodes-base.filter","typeVersion":2.2,"position":[1216,-64],"id":"ee979ec9-03f4-41e7-a88d-7bd2a8b7b6a5","name":"Filter"},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"e1b6933c-03fe-4bdb-b22e-13188d857e9a","leftValue":"={{ $('Filter').item.json.message }}","rightValue":"","operator":{"type":"object","operation":"exists","singleValue":true}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.if","typeVersion":2.2,"position":[2544,-96],"id":"1697be8b-6dfe-4843-b244-973575269c62","name":"If"},{"parameters":{"promptType":"define","text":"={{ $json.body ? $json.body.message.text : $json.message.text }}","options":{"systemMessage":"=You are Auto Momo, an intelligent productivity assistant designed to help manage daily tasks, communications, and schedules efficiently. You have access to multiple tools and should use them proactively to assist the user.\n\n## Core Identity\n- You are professional, helpful, and proactive\n- Always maintain a personal assistant tone - attentive but not overly casual\n- Use \"Cristian Alcaraz\" as the user's name in all communications\n- Current date and time: {{ $now }}\n- Timezone: Europe/Madrid\n\n## Available Capabilities\n\n### Email Management (multiple Tools from Google Mail)\n- Read, send, reply to, and draft emails\n- Organize emails with labels\n- Search and filter emails by various criteria\n- Always use well-formatted HTML for email composition\n- Include proper signatures with \"Jitesh Dugar\"\n- If you're asked to send an email, just use the 'Google Contacts Tool' to get their email address first, then confirm from the user\n\n### Calendar Management (Multiple Tools from Google Calendar)\n- Check availability and schedule conflicts\n- Create, update, reschedule, and delete events\n- Retrieve upcoming events and meetings\n- Handle meeting requests and confirmations\n\n### Task Management (Multiple Tools from Asana)\n- Search tasks by given text or get many tasks assigned to myself\n- Create, update, complete, and delete tasks\n- Get user information\n- Retrieve projects lists filtering by Teams\n- Retrieve task lists with filtering options\n- Set due dates and add detailed notes\n- Mark tasks as completed with timestamps\n- You can get a list of tasks and then use the Get a specific task tool in order to get extra information\n- By default, filter tasks asigned to me: cristian.alcaraz@bigmomo.com\n\n### Contact Management (Google Contacts Tool)\n- Search and retrieve contact information\n- Access email addresses and phone numbers for communications\n\n## Communication Guidelines\n\n### Email Composition\n- Use professional HTML formatting\n- Include clear subject lines\n- Structure emails with proper greetings and closings\n- Always sign emails as \"Jitesh Dugar\"\n- No placeholder text - ask for clarification if information is missing\n\n### Response Style\n- Be concise but complete in responses\n- Proactively suggest related actions when appropriate\n- Confirm actions taken and provide relevant details\n- If multiple steps are involved, explain what you're doing\n\n## Operational Rules\n\n### Data Handling\n- Always use specific, actionable parameters\n- For dates, use future dates when creating tasks/events unless specified otherwise\n- When scheduling, check for conflicts before confirming\n- Validate email addresses before sending\n\n### Error Management\n- If information is incomplete, ask specific questions\n- Don't use placeholders or generic text\n- Confirm understanding before executing actions\n- Provide clear feedback on completed actions\n\n### Privacy & Security\n- Handle all personal information with appropriate discretion\n- Confirm sensitive actions before executing\n- Maintain professional boundaries in all communications\n\n## Task Prioritization\n1. **Urgent**: Time-sensitive items (meetings, deadlines)\n2. **Important**: High-impact tasks and communications\n3. **Routine**: Regular maintenance and organization\n4. **Optional**: Enhancement and optimization tasks\n\n## Example Interactions\n\n**Calendar Query**: \"What meetings do I have today?\"\n→ Check calendar for today's events, provide detailed schedule with times and attendees\n\n**Email Task**: \"Send a follow-up email to the marketing team about the quarterly review\"\n→ Ask for specific details if needed, compose professional HTML email, confirm before sending\n\n**Task Creation**: \"Add a reminder to prepare the presentation for next week\"\n→ Create task with appropriate due date, ask for specific deadline if unclear\n\n## Always Remember\n- You represent Cristian professionally in all communications\n- Double-check important details before executing actions\n- Provide clear confirmations of completed tasks\n- Be proactive in suggesting helpful follow-up actions\n- Maintain context across conversations using the memory system\n- You can always combine tools\n\n## LIMITATIONS ##\n- Your input/output is usually a chat like Telegram or Google Chat. Consider this for your answers as they will not render tables, markdown and similar things.\n- Avoid using escaping characters like \\ or \\\\*\n- Only run once, never repeat an answer for the same question\n- IMPORTANT: Limit the answer to 4000 characters."}},"id":"1e4372bb-7380-4484-a498-8a5948b662d7","name":"Auto Momo","type":"@n8n/n8n-nodes-langchain.agent","position":[1696,144],"typeVersion":2.2,"onError":"continueRegularOutput"}],"connections":{"Think":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get Event":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get Emails":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get Labels":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Send Email":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Draft Email":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get Contacts":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Only allow me":{"main":[[{"node":"Filter","type":"main","index":0}]]},"Simple Memory":{"ai_memory":[[{"node":"Auto Momo","type":"ai_memory","index":0}]]},"Get all Events":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Create an event":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Reschedule Event":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Telegram Trigger":{"main":[[{"node":"Only allow me","type":"main","index":0}]]},"Draft Email Reply":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Reply to an Email":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Set Reply Message":{"main":[[{"node":"If","type":"main","index":0}]]},"Add Label to Email":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Check Availability":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Delete Calendar Event":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Google Gemini Chat Model":{"ai_languageModel":[[{"node":"Auto Momo","type":"ai_languageModel","index":0}]]},"Complete a task in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get many tasks in Asana1":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Delete a task in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get a task in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Create a task in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Search a task in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get many projects in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Get a user in Asana":{"ai_tool":[[{"node":"Auto Momo","type":"ai_tool","index":0}]]},"Webhook":{"main":[[{"node":"Filter","type":"main","index":0}]]},"Filter":{"main":[[{"node":"Auto Momo","type":"main","index":0}]]},"If":{"main":[[{"node":"Send a text message","type":"main","index":0}],[{"node":"Create a message","type":"main","index":0}]]},"Auto Momo":{"main":[[{"node":"Set Reply Message","type":"main","index":0}]]}},"settings":{"callerPolicy":"workflowsFromSameOwner","executionOrder":"v1","availableInMCP":false,"errorWorkflow":"8vgwakbL7IcugV2b","timeSavedPerExecution":5},"staticData":null,"meta":{"templateId":"8500","templateCredsSetupCompleted":true},"pinData":{},"versionId":"a27088e8-6783-486b-bb7f-ecc53203640c","triggerCount":2,"shared":[{"updatedAt":"2025-10-24T13:19:07.589Z","createdAt":"2025-10-24T13:19:07.589Z","role":"workflow:owner","workflowId":"VuJjt8th71dIyzLA","projectId":"rGXkia6aVrtkTfUq"}],"tags":[]}
+{
+  "updatedAt": "2025-10-28T23:06:58.000Z",
+  "createdAt": "2025-10-24T13:19:07.582Z",
+  "id": "VuJjt8th71dIyzLA",
+  "name": "(ai) automomo - productivity agent",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body ? $('Webhook').item.json.body.message.sender.name : $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "id": "d7fe0bed-44ec-4c0a-b66f-12e36bf9483d",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1632,
+        304
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "33df9b0d-7bc9-48ed-8664-eece9c875739",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2256,
+        1120
+      ],
+      "webhookId": "b5692bdd-471a-4141-8710-b0909a433939",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Reply to an email message. AI-configurable parameters: Message_ID (string) - the ID of the message; Message (string) - the reply content; Attachment_Field_Name (string) - input field name containing attachments; BCC (string) - comma-separated BCC recipients; CC (string) - comma-separated CC recipients.",
+        "operation": "reply",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attachment_Field_Name', ``, 'string') }}"
+              }
+            ]
+          },
+          "bccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}",
+          "ccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}"
+        }
+      },
+      "id": "55889898-08c6-4357-a448-fd9e7b0a3d29",
+      "name": "Reply to an Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2352,
+        1184
+      ],
+      "webhookId": "3fda5336-8c0d-426c-abf4-e614cadbcc12",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve multiple email messages based on filters. AI-configurable parameters: Return_All (boolean) - whether to return all matching messages; Search (string) - Gmail query string to filter messages; Received_After (string) - datetime (RFC3339) after which messages are received; Received_Before (string) - datetime before which messages are received; Sender (string) - email address of the sender.",
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "filters": {
+          "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search', ``, 'string') }}",
+          "receivedAfter": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Received_After', ``, 'string') }}",
+          "receivedBefore": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Received_Before', ``, 'string') }}"
+        }
+      },
+      "id": "6bbe7356-33c4-452b-b6d8-726f7af3a2d2",
+      "name": "Get Emails",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2464,
+        1248
+      ],
+      "webhookId": "35b2c37f-1e18-4fec-a442-3f672e8d839c",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Add one or more labels to an email message. AI-configurable parameters: Message_ID (string) - the ID of the message to label; Label_Names_or_IDs (string) - comma-separated label names or IDs to apply.",
+        "operation": "addLabels",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}"
+      },
+      "id": "97f26bc6-f2cd-40fd-9617-c26af6368ad4",
+      "name": "Add Label to Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2560,
+        1312
+      ],
+      "webhookId": "e985e162-2fb5-480a-9c72-5bd5b62876df",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Retrieve a list of labels. AI-configurable parameters: Return_All (boolean) - whether to return all labels.",
+        "resource": "label",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "id": "26dad8fd-c349-433e-a471-71dbfd97c56b",
+      "name": "Get Labels",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2656,
+        1264
+      ],
+      "webhookId": "4bffaaac-3a2e-4cdb-8809-69a2ea942d7b",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an email draft. AI-configurable parameters: Subject (string) - the subject of the draft; Message (string) - the body of the draft; Attachment_Field_Name__in_Input_ (string) - input field name containing attachments; BCC (string) - comma-separated BCC recipients; CC (string) - comma-separated CC recipients.",
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "html",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "bccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}",
+          "ccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}",
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}"
+        }
+      },
+      "id": "a47d9f12-5973-4a93-81f8-7a7f03a4214b",
+      "name": "Draft Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2736,
+        1168
+      ],
+      "webhookId": "89cfafeb-e670-46e1-a5c2-f0a0e3ad0332",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Draft a reply to an email. Use the thread_id parameter to pass the thread for which the email must be drafted",
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "html",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "bccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('BCC', ``, 'string') }}",
+          "ccList": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('CC', ``, 'string') }}",
+          "threadId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Thread_ID', ``, 'string') }}"
+        }
+      },
+      "id": "957ea20b-4d3f-4ad4-bbcd-42fdf1a5af82",
+      "name": "Draft Email Reply",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        2832,
+        1088
+      ],
+      "webhookId": "95797251-5c38-45f1-8203-377716c743bd",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "Gmail account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Check if a slot is available on my calendar",
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {
+          "timezone": {
+            "__rl": true,
+            "value": "Europe/Madrid",
+            "mode": "list",
+            "cachedResultName": "Europe/Madrid"
+          }
+        }
+      },
+      "id": "47e41e13-e6e7-4959-bb08-1f1f4da01b34",
+      "name": "Check Availability",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        832,
+        1120
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get future events on Google Calendar",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "returnAll": true,
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', `Should be a future date and time`, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {
+          "orderBy": "startTime",
+          "recurringEventHandling": "expand",
+          "timeZone": {
+            "__rl": true,
+            "value": "Europe/Madrid",
+            "mode": "list",
+            "cachedResultName": "Europe/Madrid"
+          }
+        }
+      },
+      "id": "bd20eb61-ade0-4b4b-ba89-943dfa11ac05",
+      "name": "Get all Events",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        928,
+        1200
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Delete Calendar Event",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the event id of the event to delete`, 'string') }}",
+        "options": {}
+      },
+      "id": "ace1f669-dd08-48df-81bc-30c852e1424d",
+      "name": "Delete Calendar Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        1008,
+        1312
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update an event on Google Calendar",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "jitesh.com@gmail.com",
+          "cachedResultName": "jitesh.com@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the id of the event to reschedule or update`, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "updateFields": {
+          "attendeesUi": {
+            "values": {
+              "mode": "replace",
+              "attendees": [
+                "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+              ]
+            }
+          },
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "sendUpdates": "all",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}"
+        }
+      },
+      "id": "e24ed479-8a75-4c21-9f25-51d603b35574",
+      "name": "Reschedule Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        1136,
+        1328
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get an event in Google Calendar",
+        "operation": "get",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', `Pass the event id`, 'string') }}",
+        "options": {}
+      },
+      "id": "8e9a40fd-9f34-44e0-b256-f15eb0a73ba2",
+      "name": "Get Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        1216,
+        1216
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event on Google Calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}",
+          "visibility": "default"
+        }
+      },
+      "id": "991c7d7f-3bcf-4006-8a56-8e606ff49307",
+      "name": "Create an event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "position": [
+        1312,
+        1104
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "Google Calendar account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "af55b978-143b-424a-9039-887506a91b30",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        672,
+        -208
+      ],
+      "webhookId": "6d90bff2-32dd-44fc-b11b-4217a615dfed",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "eXcrR3IJLRzEjs2W",
+          "name": "Telegram account - cristian momo bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "fields": [
+          "names",
+          "emailAddresses"
+        ],
+        "useQuery": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Query', ``, 'boolean') }}",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "rawData": true,
+        "options": {}
+      },
+      "id": "8782f94e-ac80-43d9-9491-ad9c926a3b22",
+      "name": "Get Contacts",
+      "type": "n8n-nodes-base.googleContactsTool",
+      "position": [
+        2800,
+        640
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "1Z3XR7jUTY5zSQtH",
+          "name": "Google Contacts - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1699724333",
+        "text": "={{ $('Set Reply Message').item.json.message.replace(/[_*\\[\\]()~`>#+=\\-|{}.!\\\\]/g, '\\\\$&') }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "MarkdownV2"
+        }
+      },
+      "id": "c55bbfc0-fab5-47e9-a98a-6cd35cdde48a",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2784,
+        -224
+      ],
+      "webhookId": "84ca051b-0e3c-4311-8117-eca08c4a86fa",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "eXcrR3IJLRzEjs2W",
+          "name": "Telegram account - cristian momo bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "74570957-ff95-4df8-bbc2-043c4973a733",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.message.chat.username }}",
+              "rightValue": "zephirone"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "179ee564-930e-441c-83c1-186059367bf6",
+      "name": "Only allow me",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        880,
+        -208
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c707ac04-2237-4cc4-991a-6aa22b1cef81",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.output || $json.error }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "08fa5cc0-27a1-4a26-b6b1-518536f4e456",
+      "name": "Set Reply Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2336,
+        -48
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "id": "6354b7fd-c734-414f-b75c-d1aea74bd648",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        2016,
+        288
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Auto Momo 🤖\nYour AI-powered personal assistant.  \n- Orchestrates tasks, calendar, emails, contacts & expenses  \n- Uses memory + OpenAI model for smart decisions  \n- Sends results back to Telegram  ",
+        "height": 704,
+        "width": 720
+      },
+      "id": "e343c81a-8bc3-4378-b43a-d5518108cf21",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1472,
+        -32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Gmail MCP 📧\nFull email management.  \n- Send & draft messages  \n- Reply, label, and fetch emails  ",
+        "height": 640,
+        "width": 768,
+        "color": 3
+      },
+      "id": "05be19b3-cfdc-43b7-88ab-7b7b4167e0fd",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2208,
+        880
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Google Contacts MCP 👥\nAccess and manage your contact list.  \n- Fetch contacts for quick communication  ",
+        "height": 416,
+        "width": 448,
+        "color": 6
+      },
+      "id": "afd43947-b4a8-412f-82da-62885e2406d5",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2608,
+        384
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Calendar MCP 📅\nYour scheduling hub.  \n- Check availability  \n- Create, reschedule, or delete events ",
+        "height": 704,
+        "width": 624,
+        "color": 5
+      },
+      "id": "efda731e-8751-4a67-b76c-a8bacac92064",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Task Manager MCP ✅\nManages to-dos with ease:  \n- Create / Complete / Delete tasks  \n- Retrieve individual or bulk tasks ",
+        "height": 624,
+        "width": 560,
+        "color": 6
+      },
+      "id": "3558db0a-ebe7-4942-9dfb-ad610d59a94b",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        240
+      ],
+      "id": "240f7612-810c-4876-9261-b8d1310651b7",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4opOWz4CcbsKpSMm",
+          "name": "Google Gemini(PaLM) Api - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workspace": "43540521088120",
+        "name": "={{ $fromAI('Title', ``, 'string') }}",
+        "otherProperties": {
+          "assignee": "=cristian.alcaraz@bigmomo.com",
+          "due_on": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Due_On', `Always use future dates`, 'string') }}",
+          "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        384,
+        336
+      ],
+      "id": "08580662-79f9-482a-86b4-9ad0bf97cfe7",
+      "name": "Create a task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        528,
+        352
+      ],
+      "id": "3df181a8-f757-4654-9105-ea9e6d1ca5e1",
+      "name": "Get a task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        656,
+        368
+      ],
+      "id": "9b57c7f9-7d77-4a5d-b020-838ddaf4d335",
+      "name": "Delete a task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}",
+        "otherProperties": {
+          "completed": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completed', `Pass the task_id of the task to be completed`, 'boolean') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        384,
+        608
+      ],
+      "id": "ffc97650-6e1a-423c-b0c6-e0ae85843c1f",
+      "name": "Complete a task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "filters": {
+          "assignee": "=cristian.alcaraz@bigmomo.com",
+          "workspace": "43540521088120",
+          "completed_since": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completed_Since', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        256,
+        576
+      ],
+      "id": "62bba888-9356-496f-832e-3df24fe325f3",
+      "name": "Get many tasks in Asana1",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "workspace": "43540521088120",
+        "searchTaskProperties": {
+          "completed": false,
+          "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        240,
+        304
+      ],
+      "id": "1642a750-2cf1-456d-a873-1dd1cfd15512",
+      "name": "Search a task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "project",
+        "operation": "getAll",
+        "workspace": "43540521088120",
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "additionalFields": {
+          "team": "={{ $fromAI('ID', ``, 'number') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        528,
+        576
+      ],
+      "id": "2a235bcf-cb62-4819-80a7-c09b0028ff37",
+      "name": "Get many projects in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "userId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('User_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.asanaTool",
+      "typeVersion": 1,
+      "position": [
+        656,
+        608
+      ],
+      "id": "4ceb847f-c97b-42ec-8893-6304375e0b95",
+      "name": "Get a user in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "Asana account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n-google-chat",
+        "options": {
+          "responseData": "{\"text\": \"🤖 Recibido. Estoy procesando tu solicitud, dame un momento por favor...\"}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        -16
+      ],
+      "id": "4d32e0bf-2d18-4f0f-a855-15195c8f5f64",
+      "name": "Webhook",
+      "webhookId": "0aaec3b4-1258-490b-a947-f09322f0bf99"
+    },
+    {
+      "parameters": {
+        "spaceId": "={{ $('Webhook').item.json.body.message.space.name }}",
+        "messageUi": {
+          "text": "={{ $('Set Reply Message').item.json.message }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        -48
+      ],
+      "id": "7448cff5-e7ed-43a6-b85b-1c2b622b83a0",
+      "name": "Create a message",
+      "webhookId": "5ab4fbe6-1cf1-4282-b396-f0d741397a17",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "Google Service Account - bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "72dab741-c2d4-4057-9c06-96a6eed1426c",
+              "leftValue": "={{ $json.body }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "7180380b-4811-4130-9de0-cd9ab3378ae9",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        -64
+      ],
+      "id": "ee979ec9-03f4-41e7-a88d-7bd2a8b7b6a5",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e1b6933c-03fe-4bdb-b22e-13188d857e9a",
+              "leftValue": "={{ $('Filter').item.json.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2544,
+        -96
+      ],
+      "id": "1697be8b-6dfe-4843-b244-973575269c62",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body ? $json.body.message.text : $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are Auto Momo, an intelligent productivity assistant designed to help manage daily tasks, communications, and schedules efficiently. You have access to multiple tools and should use them proactively to assist the user.\n\n## Core Identity\n- You are professional, helpful, and proactive\n- Always maintain a personal assistant tone - attentive but not overly casual\n- Use \"Cristian Alcaraz\" as the user's name in all communications\n- Current date and time: {{ $now }}\n- Timezone: Europe/Madrid\n\n## Available Capabilities\n\n### Email Management (multiple Tools from Google Mail)\n- Read, send, reply to, and draft emails\n- Organize emails with labels\n- Search and filter emails by various criteria\n- Always use well-formatted HTML for email composition\n- Include proper signatures with \"Jitesh Dugar\"\n- If you're asked to send an email, just use the 'Google Contacts Tool' to get their email address first, then confirm from the user\n\n### Calendar Management (Multiple Tools from Google Calendar)\n- Check availability and schedule conflicts\n- Create, update, reschedule, and delete events\n- Retrieve upcoming events and meetings\n- Handle meeting requests and confirmations\n\n### Task Management (Multiple Tools from Asana)\n- Search tasks by given text or get many tasks assigned to myself\n- Create, update, complete, and delete tasks\n- Get user information\n- Retrieve projects lists filtering by Teams\n- Retrieve task lists with filtering options\n- Set due dates and add detailed notes\n- Mark tasks as completed with timestamps\n- You can get a list of tasks and then use the Get a specific task tool in order to get extra information\n- By default, filter tasks asigned to me: cristian.alcaraz@bigmomo.com\n\n### Contact Management (Google Contacts Tool)\n- Search and retrieve contact information\n- Access email addresses and phone numbers for communications\n\n## Communication Guidelines\n\n### Email Composition\n- Use professional HTML formatting\n- Include clear subject lines\n- Structure emails with proper greetings and closings\n- Always sign emails as \"Jitesh Dugar\"\n- No placeholder text - ask for clarification if information is missing\n\n### Response Style\n- Be concise but complete in responses\n- Proactively suggest related actions when appropriate\n- Confirm actions taken and provide relevant details\n- If multiple steps are involved, explain what you're doing\n\n## Operational Rules\n\n### Data Handling\n- Always use specific, actionable parameters\n- For dates, use future dates when creating tasks/events unless specified otherwise\n- When scheduling, check for conflicts before confirming\n- Validate email addresses before sending\n\n### Error Management\n- If information is incomplete, ask specific questions\n- Don't use placeholders or generic text\n- Confirm understanding before executing actions\n- Provide clear feedback on completed actions\n\n### Privacy & Security\n- Handle all personal information with appropriate discretion\n- Confirm sensitive actions before executing\n- Maintain professional boundaries in all communications\n\n## Task Prioritization\n1. **Urgent**: Time-sensitive items (meetings, deadlines)\n2. **Important**: High-impact tasks and communications\n3. **Routine**: Regular maintenance and organization\n4. **Optional**: Enhancement and optimization tasks\n\n## Example Interactions\n\n**Calendar Query**: \"What meetings do I have today?\"\n→ Check calendar for today's events, provide detailed schedule with times and attendees\n\n**Email Task**: \"Send a follow-up email to the marketing team about the quarterly review\"\n→ Ask for specific details if needed, compose professional HTML email, confirm before sending\n\n**Task Creation**: \"Add a reminder to prepare the presentation for next week\"\n→ Create task with appropriate due date, ask for specific deadline if unclear\n\n## Always Remember\n- You represent Cristian professionally in all communications\n- Double-check important details before executing actions\n- Provide clear confirmations of completed tasks\n- Be proactive in suggesting helpful follow-up actions\n- Maintain context across conversations using the memory system\n- You can always combine tools\n\n## LIMITATIONS ##\n- Your input/output is usually a chat like Telegram or Google Chat. Consider this for your answers as they will not render tables, markdown and similar things.\n- Avoid using escaping characters like \\ or \\\\*\n- Only run once, never repeat an answer for the same question\n- IMPORTANT: Limit the answer to 4000 characters."
+        }
+      },
+      "id": "1e4372bb-7380-4484-a498-8a5948b662d7",
+      "name": "Auto Momo",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1696,
+        144
+      ],
+      "typeVersion": 2.2,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only allow me": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reschedule Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Only allow me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Email Reply": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to an Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Reply Message": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Label to Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Calendar Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete a task in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many tasks in Asana1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a task in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a task in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search a task in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many projects in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a user in Asana": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Auto Momo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Momo": {
+      "main": [
+        [
+          {
+            "node": "Set Reply Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "errorWorkflow": "8vgwakbL7IcugV2b",
+    "timeSavedPerExecution": 5
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": "8500",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a27088e8-6783-486b-bb7f-ecc53203640c",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2025-10-24T13:19:07.589Z",
+      "createdAt": "2025-10-24T13:19:07.589Z",
+      "role": "workflow:owner",
+      "workflowId": "VuJjt8th71dIyzLA",
+      "projectId": "rGXkia6aVrtkTfUq"
+    }
+  ],
+  "tags": [],
+  "kebabName": "ai-automomo-productivity-agent"
+}
