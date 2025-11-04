@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2025-11-04T19:14:20.634Z",
+  "updatedAt": "2025-11-04T21:50:40.000Z",
   "createdAt": "2025-11-04T18:06:56.892Z",
   "id": "SGjpWeocM7Ap7Mrz",
   "name": "gmail - cpanel disk quota alert",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -49,8 +49,8 @@
           "conditions": [
             {
               "id": "a2b3c4d5-e6f7-8901-bcde-f12345678901",
-              "leftValue": "={{ $json.subject }}",
-              "rightValue": "cuota",
+              "leftValue": "={{ $json.Subject }}",
+              "rightValue": "Advertencia del uso del disco",
               "operator": {
                 "type": "string",
                 "operation": "contains"
@@ -58,8 +58,26 @@
             },
             {
               "id": "a3b4c5d6-e7f8-9012-cdef-012345678902",
-              "leftValue": "={{ $json.textPlain || $json.textHtml }}",
-              "rightValue": "disco",
+              "leftValue": "={{ $json.snippet }}",
+              "rightValue": "Notificación de cuota del disco",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "en-subject-filter",
+              "leftValue": "={{ $json.Subject }}",
+              "rightValue": "Disk Usage Warning",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "en-snippet-filter",
+              "leftValue": "={{ $json.snippet }}",
+              "rightValue": "Disk quota notification for",
               "operator": {
                 "type": "string",
                 "operation": "contains"
@@ -73,31 +91,125 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2,
       "position": [
-        464,
-        304
+        640,
+        400
       ],
       "id": "b1c2d3e4-f5a6-7890-bcde-f23456789012",
       "name": "Filter - Disk Quota"
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
+        "jsCode": "// Extraer usuario y dominio del Subject\n// Ejemplo: \"[valemany.com] Advertencia del uso del disco: El usuario \\\"valemany\\\" (valemany.com)...\"\n\nconst subject = $input.item.json.Subject || '';\nconst snippet = $input.item.json.snippet || '';\n\n// Extraer dominio de [dominio.com]\nconst domainMatch = subject.match(/\\[([^\\]]+)\\]/);\nconst domain = domainMatch ? domainMatch[1] : 'unknown';\n\n// Extraer usuario de \\\"usuario\\\"\nconst userMatch = subject.match(/usuario\\s+[\"\\u201C]([^\"\\u201D]+)[\"\\u201D]/);\nconst user = userMatch ? userMatch[1] : domain.split('.')[0];\n\nreturn {\n  ...($input.item.json),\n  cpanelUser: user,\n  cpanelDomain: domain,\n  originalSnippet: snippet\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        400
+      ],
+      "id": "extract-user-domain-code",
+      "name": "Extract User & Domain"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=# Análisis de uso de disco para {{ $json.cpanelUser }}\necho \"=== DISK USAGE ANALYSIS ===\"\necho \"User: {{ $json.cpanelUser }}\"\necho \"\"\n\n# Uso total del home\necho \"=== HOME DIRECTORY SIZE ===\"\ndu -sh . 2>/dev/null || echo \"Error: Cannot access user directory\"\necho \"\"\n\n# Top 10 directorios más grandes\necho \"=== TOP 10 DIRECTORIES ===\"\ndu -h ./* 2>/dev/null | sort -rh | head -10\necho \"\"\n\n# Archivos log grandes (>50MB)\necho \"=== LARGE LOG FILES (>50MB) ===\"\nfind . -type f \\( -name \"*.log\" -o -name \"error_log\" -o -name \"*_log\" \\) -size +50M -exec ls -lh {} \\; 2>/dev/null | awk '{print $5, $9}'\necho \"\"\n\n# Tamaño de wp-content/uploads si existe\necho \"=== WORDPRESS UPLOADS ===\"\nif [ -d \"./public_html/wp-content/uploads\" ]; then\n  du -sh ./public_html/wp-content/uploads\nelse\n  echo \"No WordPress uploads directory found\"\nfi\necho \"\"\n\n# Tamaño de sites/default/files si existe\necho \"=== DRUPAL UPLOADS ===\"\nif [ -d \"./public_html/sites/default/files\" ]; then\n  du -sh ./public_html/sites/default/files\nelse\n  echo \"No Drupal uploads directory found\"\nfi\necho \"\"\n\n# Tamaño de backups si existen\necho \"=== BACKUPS ===\"\nfind . -type d \\( -name \"*backup*\" -o -name \"*bak\" \\) -exec du -sh {} \\; 2>/dev/null | head -5\necho \"\"",
+        "cwd": "=/home/{{ $json.cpanelUser }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        400
+      ],
+      "id": "ssh-disk-analysis",
+      "name": "SSH: Analyze Disk Usage",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "RpnkLDMZNn3i0YFH",
+          "name": "ssh - bigmomo-1 production - root caution"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar el análisis de disco y determinar acciones\nconst output = $input.item.json.stdout || '';\nconst user = $input.item.json.cpanelUser;\nconst domain = $input.item.json.cpanelDomain;\n\nconst actions = [];\nconst largeLogFiles = [];\nlet uploadsSize = null;\nlet recommendCleanup = false;\n\n// Parsear archivos log grandes\n// Buscar desde el título hasta la siguiente sección (===)\nconst logSection = output.match(/=== LARGE LOG FILES.*?\\n([\\s\\S]*?)(?=\\n===|$)/);\nif (logSection && logSection[1]) {\n  // Parsear cada línea que tenga formato: SIZE PATH\n  const logLines = logSection[1].split('\\n').filter(line => line.trim());\n  \n  logLines.forEach(line => {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length >= 2) {\n      const size = parts[0];\n      const path = parts.slice(1).join(' ');\n      // Verificar que tenemos un tamaño válido (formato: 123M, 1.5G, etc.)\n      // y que el path es una ruta (empieza con ./ o /)\n      if (/^[0-9.]+[KMGT]$/.test(size) && (path.startsWith('./') || path.startsWith('/'))) {\n        largeLogFiles.push({ size, path });\n      }\n    }\n  });\n}\n\n// Determinar acciones para logs\nif (largeLogFiles.length > 0) {\n  const logDetails = largeLogFiles.map(log => `  • ${log.size} - ${log.path}`).join('\\n');\n  actions.push(`🗑️ **Logs grandes detectados** (${largeLogFiles.length} archivo(s)):\\n${logDetails}\\n  ➜ Se vacían automáticamente`);\n} else {\n  actions.push('✅ No se encontraron logs excesivamente grandes');\n}\n\n// Analizar uploads de WordPress\nconst uploadsMatch = output.match(/=== WORDPRESS UPLOADS.*?\\n([0-9.]+[KMGT])/);\nif (uploadsMatch) {\n  uploadsSize = uploadsMatch[1];\n  const sizeValue = parseFloat(uploadsSize);\n  const unit = uploadsSize.slice(-1);\n  \n  if ((unit === 'G' && sizeValue > 5) || unit === 'T') {\n    recommendCleanup = true;\n    actions.push(`⚠️ **WordPress uploads (${uploadsSize})**: Recomendado revisar y limpiar archivos antiguos/no usados`);\n  } else {\n    actions.push(`📁 WordPress uploads: ${uploadsSize}`);\n  }\n}\n\n// Analizar uploads de Drupal\nconst drupalUploadsMatch = output.match(/=== DRUPAL UPLOADS.*?\\n([0-9.]+[KMGT])/);\nif (drupalUploadsMatch) {\n  const drupalUploadsSize = drupalUploadsMatch[1];\n  const sizeValue = parseFloat(drupalUploadsSize);\n  const unit = drupalUploadsSize.slice(-1);\n  \n  if ((unit === 'G' && sizeValue > 5) || unit === 'T') {\n    recommendCleanup = true;\n    actions.push(`⚠️ **Drupal uploaded files (${drupalUploadsSize})**: Recomendado revisar y limpiar archivos antiguos/no usados`);\n  } else {\n    actions.push(`📁 Drupal uploaded files: ${drupalUploadsSize}`);\n  }\n}\n\n// Analizar backups\nif (output.includes('backup')) {\n  const backupLines = output.match(/=== BACKUPS ===[\\s\\S]*?(?===|$)/);\n  if (backupLines && backupLines[0].includes('G') && !backupLines[0].includes('No backups')) {\n    actions.push('📦 **Backups detectados**: Revisar si son necesarios todos los backups almacenados');\n  }\n}\n\nreturn {\n  ...($input.item.json),\n  diskAnalysis: output,\n  largeLogFiles: largeLogFiles,\n  actions: actions.join('\\n'),\n  needsLogCleanup: largeLogFiles.length > 0\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        608
+      ],
+      "id": "process-analysis-code",
+      "name": "Process Analysis"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "id": "c1d2e3f4-a5b6-7890-cdef-123456789023",
-              "name": "alertMessage",
-              "value": "=🚨 *Alerta de Cuota de Disco - cPanel*\n\n📧 *De:* {{ $json.from }}\n📝 *Asunto:* {{ $json.subject }}\n\n*Mensaje:*\n{{ $json.textPlain || $json.snippet }}\n\n🔗 [Ver email]({{ $json.webLink }})",
-              "type": "string"
+              "id": "needs-cleanup-condition",
+              "leftValue": "={{ $json.needsLogCleanup }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        688,
-        304
+        864,
+        608
+      ],
+      "id": "if-needs-cleanup",
+      "name": "If Needs Cleanup"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ $json.largeLogFiles.map(log => `echo \"Truncating: ${log.path}\" && truncate -s 0 \"${log.path}\"`).join(' && ') }}",
+        "cwd": "=/home/{{ $('Extract User & Domain').item.json.cpanelUser }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        608
+      ],
+      "id": "ssh-cleanup-logs",
+      "name": "SSH: Cleanup Large Logs",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "RpnkLDMZNn3i0YFH",
+          "name": "ssh - bigmomo-1 production - root caution"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatear el mensaje de alerta con saltos de línea correctos\nconst user = $('Extract User & Domain').item.json.cpanelUser;\nconst domain = $('Extract User & Domain').item.json.cpanelDomain;\nconst snippet = $('Extract User & Domain').item.json.originalSnippet;\nconst actions = $input.item.json.actions || '';\n\n// Reemplazar \\n literales por saltos de línea reales\nconst actionsFormatted = actions.replace(/\\\\n/g, '\\n');\n\nconst alertMessage = `🚨 *Alerta de Cuota de Disco - cPanel*\n\n👤 *Usuario:* ${user}\n🌐 *Dominio:* ${domain}\n\n📝 *Mensaje:*\n${snippet}\n\n🔧 *Acciones:*\n${actionsFormatted}`;\n\nreturn { alertMessage };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        816
       ],
       "id": "d1e2f3a4-b5c6-7890-def0-234567890134",
       "name": "Format Alert Message"
@@ -113,8 +225,8 @@
       "type": "n8n-nodes-base.googleChat",
       "typeVersion": 1,
       "position": [
-        912,
-        304
+        864,
+        816
       ],
       "id": "e1f2a3b4-c5d6-7890-ef01-345678901245",
       "name": "Send to Google Chat",
@@ -129,14 +241,17 @@
     {
       "parameters": {
         "operation": "removeLabels",
-        "messageId": "={{ $json.id }}",
-        "labelIds": "UNREAD"
+        "messageId": "={{ $('Gmail Trigger - cPanel').item.json.id }}",
+        "labelIds": [
+          "UNREAD",
+          "INBOX"
+        ]
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1120,
-        304
+        1088,
+        816
       ],
       "id": "f1a2b3c4-d5e6-7890-f012-456789012356",
       "name": "Mark as Read",
@@ -147,6 +262,19 @@
           "name": "gmail - cristian bigmomo"
         }
       }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        448,
+        304
+      ],
+      "id": "8c17a0a9-5975-4c39-98f3-d4c9e928430c",
+      "name": "Loop Over Items"
     }
   ],
   "connections": {
@@ -154,7 +282,7 @@
       "main": [
         [
           {
-            "node": "Filter - Disk Quota",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -162,6 +290,68 @@
       ]
     },
     "Filter - Disk Quota": {
+      "main": [
+        [
+          {
+            "node": "Extract User & Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract User & Domain": {
+      "main": [
+        [
+          {
+            "node": "SSH: Analyze Disk Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH: Analyze Disk Usage": {
+      "main": [
+        [
+          {
+            "node": "Process Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Analysis": {
+      "main": [
+        [
+          {
+            "node": "If Needs Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Needs Cleanup": {
+      "main": [
+        [
+          {
+            "node": "SSH: Cleanup Large Logs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH: Cleanup Large Logs": {
       "main": [
         [
           {
@@ -193,16 +383,52 @@
           }
         ]
       ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Filter - Disk Quota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Read": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "8vgwakbL7IcugV2b",
+    "timeSavedPerExecution": 15
   },
-  "staticData": null,
+  "staticData": {
+    "node:Gmail Trigger - cPanel": {
+      "Gmail Trigger - cPanel": {
+        "lastTimeChecked": 1761970021,
+        "possibleDuplicates": [
+          "19a507ed3800a4fe"
+        ]
+      }
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "bd750eaa-5fec-45ba-bc55-acd70dfb0fa0",
-  "triggerCount": 0,
+  "versionId": "7c280561-a35f-47f1-9bee-dc2c5d44fd40",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2025-11-04T18:06:56.911Z",
