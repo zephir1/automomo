@@ -66,6 +66,18 @@ def sync_workflows_to_git():
         workflow_id = workflow['id']
         full_workflow = client.get_workflow(workflow_id)
         
+        # Clean up nested metadata that causes unnecessary diffs
+        # Remove the nested 'project' object from shared array if present
+        if 'shared' in full_workflow and isinstance(full_workflow['shared'], list):
+            for shared_item in full_workflow['shared']:
+                if 'project' in shared_item:
+                    # Keep only essential fields from shared
+                    project_id = shared_item.get('projectId')
+                    shared_item.pop('project', None)
+        
+        # Remove versionCounter (changes on every edit, not meaningful for version control)
+        full_workflow.pop('versionCounter', None)
+        
         # Save to file
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(full_workflow, f, indent=2, ensure_ascii=False)
