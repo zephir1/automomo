@@ -51,6 +51,13 @@ class WorkflowDeployer:
         deploy_data = {k: v for k, v in local_workflow.items() 
                       if k in allowed_fields}
         
+        # Filter settings to only include allowed fields
+        # Only executionOrder is allowed, other fields are read-only
+        if 'settings' in deploy_data and deploy_data['settings']:
+            allowed_settings = ['executionOrder']
+            deploy_data['settings'] = {k: v for k, v in deploy_data['settings'].items() 
+                                       if k in allowed_settings}
+        
         # Add staticData only if it exists and is not None
         if local_workflow.get('staticData') is not None:
             deploy_data['staticData'] = local_workflow['staticData']
