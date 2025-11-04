@@ -36,9 +36,13 @@ Automomo es un sistema que mantiene sincronizados tus workflows de n8n con un re
 
 ```bash2. Click on the workflow menu (⋮)
 
-cd /home/bigmomo_n8n_cristian/automomo3. Select "Download"
+cd /home/bigmomo_n8n_cristian/automomo
 
-./setup.sh4. Save the JSON file to the `workflows/` directory
+3. Select "Download"
+
+./setup.sh
+
+4. Save the JSON file to the `workflows/` directory
 
 ```5. Commit and push:
 
@@ -321,7 +325,7 @@ git checkout <commit> workflows/workflow-borrado.json  # Restaurar
 
 ### Los nombres de archivo no coinciden
 
-Ejecuta pull para regenerar con nomenclatura correcta:
+Ejecuta pull para regenerar con nomenclatura correcta (kebab-case):
 ```bash
 ./automomo pull
 ```
@@ -332,11 +336,117 @@ Ejecuta pull para regenerar con nomenclatura correcta:
 ./automomo push --force  # Forzar actualización
 ```
 
-## 📚 Links útiles
+### Error 400 al hacer push
+
+Si ves `400 Client Error: Bad Request`, verifica:
+
+1. **El workflow JSON es válido**:
+   ```bash
+   python3 -m json.tool workflows/tu-workflow.json
+   ```
+
+2. **No estás enviando campos prohibidos** (el script ya los filtra automáticamente):
+   - ❌ No incluyas: `active`, `id`, `pinData`, `tags`, `meta`, `versionCounter` al crear workflows nuevos
+   - ✅ Solo incluye: `name`, `nodes`, `connections`, `settings`
+
+3. **Revisa el error detallado**:
+   ```bash
+   python3 scripts/deploy_to_n8n.py --force "nombre workflow" 2>&1 | tail -20
+   ```
+
+### Workflows no se sincronizan automáticamente
+
+1. Verifica que el workflow "n8n - backup to git" esté **activo** en n8n
+2. Revisa el Schedule Trigger (frecuencia)
+3. Comprueba errores en execuciones: n8n UI → Executions
+
+### Formato JSON: ¿Indentado o minified?
+
+**Respuesta: Indentado (2 espacios)** para mejor legibilidad y diffs en Git.
+
+- Local (`./automomo pull`): guarda con `indent=2`
+- Backup automático: usa `JSON.stringify(item, null, 2)` en el Code node del workflow de backup
+
+Si un workflow aparece en 1 línea (minified), haz pull para reformatearlo:
+```bash
+./automomo pull
+```
+
+## � Lecciones Aprendidas & Tips
+
+### Campos de API de n8n
+
+La API de n8n para **actualizar** workflows es muy estricta:
+
+✅ **Acepta solo**: `name`, `nodes`, `connections`, `settings`, `staticData` (si no es null)
+
+❌ **Rechaza**: `active`, `id`, `pinData`, `tags`, `meta`, `versionId`, `versionCounter`, `triggerCount`, `shared`, `isArchived`, `createdAt`, `updatedAt`
+
+**El script `deploy_to_n8n.py` filtra automáticamente los campos prohibidos.**
+
+### Gmail Node: Marcar como leído
+
+Para marcar un email como leído en Gmail node:
+
+```json
+{
+  "operation": "removeLabels",
+  "messageId": "={{ $json.id }}",
+  "labelIds": "UNREAD"
+}
+```
+
+**NO uses** `operation: "markAsRead"` (no existe en la API del nodo).
+
+### Nomenclatura de archivos
+
+| En n8n | En Git | Función |
+|--------|--------|---------|
+| `gmail - cpanel disk quota alert` | `gmail-cpanel-disk-quota-alert.json` | `name_to_kebab_case()` |
+| `(ai) gmail - triage` | `ai-gmail-triage.json` | Quita paréntesis, kebab-case |
+
+**La conversión es automática** al hacer `./automomo pull`.
+
+### Formato JSON recomendado
+
+Usa **indentación de 2 espacios** para:
+- ✅ Diffs legibles en Git
+- ✅ Más fácil revisar código de Code nodes
+- ✅ GitHub Copilot puede entender mejor la estructura
+
+El workflow de backup automático (`n8n - backup to git`) está configurado para guardar con formato indentado.
+
+### Forzar actualización
+
+Si el deploy dice "Sin cambios" pero sabes que hay cambios:
+
+```bash
+./automomo push --force "nombre workflow"
+```
+
+Esto omite la comparación y fuerza la actualización.
+
+### Backup automático vs Manual
+
+**Automático** (recomendado en producción):
+- Workflow "n8n - backup to git" se ejecuta cada X minutos
+- Commits automáticos a GitHub con mensaje `backup: workflow-name.json`
+- No requiere intervención manual
+
+**Manual** (recomendado durante desarrollo):
+- `./automomo pull` cuando quieras sincronizar
+- Control total sobre commits
+- Puedes agrupar cambios y escribir mensajes descriptivos
+
+**Tip**: Usa automático en producción + manual durante desarrollo activo.
+
+## �📚 Links útiles
 
 - **n8n**: https://automomo.bigmomo.com
 - **GitHub Repo**: https://github.com/zephir1/automomo
 - **n8n API Docs**: https://docs.n8n.io/api/
+- **AGENTS.md**: Documentación completa para IA (más técnica)
+- **SETUP.md**: Configuración inicial paso a paso
 
 ## 🤖 Sobre este proyecto
 
@@ -346,6 +456,39 @@ Creado para mantener workflows de n8n sincronizados con Git y poder trabajar con
 **Organización**: BigMomo  
 **Fecha**: Noviembre 2025
 
+## 📝 Changelog
+
+### v1.1.0 - 2025-11-04
+
+**Mejoras en deploy_to_n8n.py**:
+- ✅ Filtrado correcto de campos para API de n8n (solo envía `name`, `nodes`, `connections`, `settings`, `staticData`)
+- ✅ Flag `--force` funciona correctamente para forzar actualizaciones
+- ✅ Mejor manejo de errores 400 Bad Request
+
+**Formato JSON**:
+- ✅ Workflows guardados con indentación de 2 espacios (mejor legibilidad)
+- ✅ Workflow de backup automático actualizado para usar `JSON.stringify(item, null, 2)`
+- ✅ Diffs de Git más legibles
+
+**Nuevos workflows**:
+- ✅ `gmail-cpanel-disk-quota-alert.json` - Alerta de cuotas de disco de cPanel en Google Chat
+
+**Documentación**:
+- ✅ AGENTS.md completamente actualizado con troubleshooting y lecciones aprendidas
+- ✅ README.md mejorado con ejemplos prácticos y solución de problemas comunes
+
+### v1.0.0 - 2025-11-02
+
+**Lanzamiento inicial**:
+- ✅ Scripts de sincronización bidireccional (pull/push)
+- ✅ Encriptación de credenciales
+- ✅ CLI unificada (`./automomo`)
+- ✅ Workflow de backup automático a GitHub
+- ✅ Conversión automática a kebab-case
+
 ---
 
-**¿Preguntas o problemas?** Revisa [SETUP.md](SETUP.md) o consulta la documentación de n8n.
+**¿Preguntas o problemas?** 
+1. Revisa [AGENTS.md](AGENTS.md) (documentación técnica completa)
+2. Consulta [SETUP.md](SETUP.md) (configuración inicial)
+3. Revisa la documentación de [n8n API](https://docs.n8n.io/api/)

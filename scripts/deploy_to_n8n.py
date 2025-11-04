@@ -44,11 +44,16 @@ class WorkflowDeployer:
         workflow_name = local_workflow.get('name', 'unnamed')
         file_path = local_workflow.get('_file_path')
         
-        # Remove metadata and fields that n8n doesn't accept in updates
-        excluded_fields = ['_file_path', 'id', 'createdAt', 'updatedAt', 'versionId', 
-                          'triggerCount', 'shared', 'isArchived']
+        # Only include fields that n8n accepts in updates
+        # name, nodes, connections, settings are the core fields
+        # staticData can be included if not None, but causes issues sometimes
+        allowed_fields = ['name', 'nodes', 'connections', 'settings']
         deploy_data = {k: v for k, v in local_workflow.items() 
-                      if k not in excluded_fields}
+                      if k in allowed_fields}
+        
+        # Add staticData only if it exists and is not None
+        if local_workflow.get('staticData') is not None:
+            deploy_data['staticData'] = local_workflow['staticData']
         
         # Check if workflow exists in n8n
         existing = remote_workflows.get(workflow_name)
@@ -56,18 +61,19 @@ class WorkflowDeployer:
         if existing:
             workflow_id = existing['id']
             
-            # Check if there are changes
-            remote_full = self.client.get_workflow(workflow_id)
-            
-            # Compare key fields (ignore metadata like updatedAt, versionId, etc.)
-            local_nodes = json.dumps(deploy_data.get('nodes', []), sort_keys=True)
-            remote_nodes = json.dumps(remote_full.get('nodes', []), sort_keys=True)
-            local_connections = json.dumps(deploy_data.get('connections', {}), sort_keys=True)
-            remote_connections = json.dumps(remote_full.get('connections', {}), sort_keys=True)
-            
-            if local_nodes == remote_nodes and local_connections == remote_connections:
-                print(f"⏭️  Sin cambios: {workflow_name}")
-                return False
+            # Check if there are changes (skip if force=True)
+            if not force:
+                remote_full = self.client.get_workflow(workflow_id)
+                
+                # Compare key fields (ignore metadata like updatedAt, versionId, etc.)
+                local_nodes = json.dumps(deploy_data.get('nodes', []), sort_keys=True)
+                remote_nodes = json.dumps(remote_full.get('nodes', []), sort_keys=True)
+                local_connections = json.dumps(deploy_data.get('connections', {}), sort_keys=True)
+                remote_connections = json.dumps(remote_full.get('connections', {}), sort_keys=True)
+                
+                if local_nodes == remote_nodes and local_connections == remote_connections:
+                    print(f"⏭️  Sin cambios: {workflow_name}")
+                    return False
             
             if dry_run:
                 print(f"🔄 [DRY-RUN] Actualizaría: {workflow_name} (ID: {workflow_id})")

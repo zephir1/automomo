@@ -1,0 +1,266 @@
+{
+  "updatedAt": "2025-11-04T19:14:20.634Z",
+  "createdAt": "2025-11-04T18:06:56.892Z",
+  "id": "SGjpWeocM7Ap7Mrz",
+  "name": "gmail - cpanel disk quota alert",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "includeSpamTrash": false,
+          "includeDrafts": false,
+          "readStatus": "unread",
+          "sender": "cpanel@"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        304
+      ],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Gmail Trigger - cPanel",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "gmail - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "a2b3c4d5-e6f7-8901-bcde-f12345678901",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "cuota",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a3b4c5d6-e7f8-9012-cdef-012345678902",
+              "leftValue": "={{ $json.textPlain || $json.textHtml }}",
+              "rightValue": "disco",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        464,
+        304
+      ],
+      "id": "b1c2d3e4-f5a6-7890-bcde-f23456789012",
+      "name": "Filter - Disk Quota"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1d2e3f4-a5b6-7890-cdef-123456789023",
+              "name": "alertMessage",
+              "value": "=🚨 *Alerta de Cuota de Disco - cPanel*\n\n📧 *De:* {{ $json.from }}\n📝 *Asunto:* {{ $json.subject }}\n\n*Mensaje:*\n{{ $json.textPlain || $json.snippet }}\n\n🔗 [Ver email]({{ $json.webLink }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        304
+      ],
+      "id": "d1e2f3a4-b5c6-7890-def0-234567890134",
+      "name": "Format Alert Message"
+    },
+    {
+      "parameters": {
+        "spaceId": "spaces/AAQAs5SDuMQ",
+        "messageUi": {
+          "text": "={{ $json.alertMessage }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        912,
+        304
+      ],
+      "id": "e1f2a3b4-c5d6-7890-ef01-345678901245",
+      "name": "Send to Google Chat",
+      "webhookId": "2a1f2cfb-8d84-4f00-a0b8-e4d2c8d07038",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "google service - cristian automomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": "UNREAD"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        304
+      ],
+      "id": "f1a2b3c4-d5e6-7890-f012-456789012356",
+      "name": "Mark as Read",
+      "webhookId": "e921b4f4-39f6-4bb7-8505-cfd0617bf592",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "81fW20A5QWw8eLph",
+          "name": "gmail - cristian bigmomo"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger - cPanel": {
+      "main": [
+        [
+          {
+            "node": "Filter - Disk Quota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - Disk Quota": {
+      "main": [
+        [
+          {
+            "node": "Format Alert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert Message": {
+      "main": [
+        [
+          {
+            "node": "Send to Google Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Google Chat": {
+      "main": [
+        [
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "bd750eaa-5fec-45ba-bc55-acd70dfb0fa0",
+  "versionCounter": 5,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-04T18:06:56.911Z",
+      "createdAt": "2025-11-04T18:06:56.911Z",
+      "role": "workflow:owner",
+      "workflowId": "SGjpWeocM7Ap7Mrz",
+      "projectId": "rGXkia6aVrtkTfUq",
+      "project": {
+        "updatedAt": "2025-10-24T08:08:37.228Z",
+        "createdAt": "2025-10-24T07:52:07.826Z",
+        "id": "rGXkia6aVrtkTfUq",
+        "name": "Cristian Alcaraz <cristian.alcaraz@bigmomo.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-10-24T07:52:07.831Z",
+            "createdAt": "2025-10-24T07:52:07.831Z",
+            "userId": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+            "projectId": "rGXkia6aVrtkTfUq",
+            "user": {
+              "updatedAt": "2025-11-03T23:00:00.000Z",
+              "createdAt": "2025-10-24T07:52:07.819Z",
+              "id": "17ca619e-ba42-4dd5-a851-7ec7454ced90",
+              "email": "cristian.alcaraz@bigmomo.com",
+              "firstName": "Cristian",
+              "lastName": "Alcaraz",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2025-10-24T08:11:22.497Z",
+                "personalization_survey_n8n_version": "1.116.2",
+                "companySize": "<20",
+                "companyType": "digital-agency",
+                "role": "business-owner",
+                "reportedSource": "friend"
+              },
+              "settings": {
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "JUSYRbe45rvkCWkk",
+                "userActivated": true,
+                "userActivatedAt": 1761301408633,
+                "npsSurvey": {
+                  "waitingForResponse": true,
+                  "ignoredCount": 1,
+                  "lastShownAt": 1761687179598
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": true,
+              "lastActiveAt": "2025-11-03",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}
