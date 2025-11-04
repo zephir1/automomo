@@ -233,10 +233,10 @@
   "staticData": {
     "node:Gmail Trigger": {
       "Gmail Trigger": {
-        "lastTimeChecked": 1762267610,
+        "lastTimeChecked": 1762280977,
         "possibleDuplicates": [
-          "19a4f55f85b3a1b3",
-          "19a4f53f6a39e3d3"
+          "19a5021b86e8649a",
+          "19a4fb6ecf086a9a"
         ]
       }
     }
@@ -256,6 +256,5 @@
       "projectId": "rGXkia6aVrtkTfUq"
     }
   ],
-  "tags": [],
-  "kebabName": "ai-gmail-triage-of-labels"
+  "tags": []
 }
