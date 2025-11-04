@@ -1,1 +1,861 @@
-{"updatedAt":"2025-11-03T20:59:50.000Z","createdAt":"2025-10-24T09:38:49.979Z","id":"DA9AybPHTp5Vt7Oj","name":"asana - create pre environment","active":true,"isArchived":false,"nodes":[{"parameters":{"operation":"get","id":"={{ $json.gid }}"},"type":"n8n-nodes-base.asana","typeVersion":1,"position":[608,0],"id":"43c2232c-c034-4833-a940-c3ad01aed8b6","name":"Get a task","retryOnFail":true,"credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"asana - cristian bigmomo"}}},{"parameters":{"operation":"search","workspace":"43540521088120","searchTaskProperties":{"text":"Crear entorno de PRE"}},"type":"n8n-nodes-base.asana","typeVersion":1,"position":[208,0],"id":"682c5062-5a48-4844-be56-bf6ed36849fa","name":"Search Tasks","retryOnFail":false,"executeOnce":false,"credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"asana - cristian bigmomo"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"96ad302b-1758-4363-ab8e-9367934051b1","leftValue":"={{ $json.name }}","rightValue":"Crear entorno de PRE","operator":{"type":"string","operation":"equals","name":"filter.operator.equals"}},{"id":"c8477889-7137-4d50-8c76-553153afe0f7","leftValue":"","rightValue":"","operator":{"type":"string","operation":"equals","name":"filter.operator.equals"}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.filter","typeVersion":2.2,"position":[400,0],"id":"efd4088f-1040-4ce7-8eaa-59f12055369a","name":"Filter Name"},{"parameters":{"rule":{"interval":[{"field":"weeks","triggerAtDay":[1,2,3,4,5],"triggerAtHour":1}]}},"type":"n8n-nodes-base.scheduleTrigger","typeVersion":1.2,"position":[0,0],"id":"797c7b6a-e168-4638-ad84-31cbb213afcd","name":"Schedule Trigger"},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"4c437f61-b786-424d-b9d7-e843bae382ed","leftValue":"={{ $json.assignee.name }}","rightValue":"Cristian Alcaraz","operator":{"type":"string","operation":"equals","name":"filter.operator.equals"}},{"id":"621d7333-a632-4339-87e0-b91ff388821a","leftValue":"={{ $json.completed }}","rightValue":"","operator":{"type":"boolean","operation":"false","singleValue":true}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.filter","typeVersion":2.2,"position":[800,0],"id":"a8bab44d-2f43-4fa6-a11c-bb728ddaf79a","name":"Filter Assignee"},{"parameters":{"authentication":"privateKey","command":"=whmapi1 createacct domain={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com username={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} password=\"{{ $json.password }}\" enable_shell=1 contactemail=dev@bigmomo.com --output=xml "},"type":"n8n-nodes-base.ssh","typeVersion":1,"position":[208,224],"id":"2c482c5a-3221-4ce8-9c6e-d62c845bf39e","name":"Create cPanel Account","credentials":{"sshPrivateKey":{"id":"frXf9ANn8NmhbXiY","name":"ssh - bigmomo-stg - root"}},"onError":"continueRegularOutput"},{"parameters":{"authentication":"privateKey","command":"=wp core download --allow-root --locale=es_ES && \\\ncp wp-config-sample.php wp-config.php && \\\nWP_KEYS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt/) && \\\ncp wp-config-sample.php wp-config.php && \\\nawk -v db_name=\"{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\" -v db_user=\"{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\" -v db_pass=\"{{ $('Password MySQL').item.json.password }}\" -v keys=\"$WP_KEYS\" '\n    /database_name_here/ { gsub(\"database_name_here\", db_name) }\n    /username_here/ { gsub(\"username_here\", db_user) }\n    /password_here/ { gsub(\"password_here\", db_pass) }\n    /define\\( *'\\''AUTH_KEY'\\''/ { print keys; skip=1; next }\n    skip == 1 && /put your unique phrase here/ { next }\n    /define\\( *'\\''NONCE_SALT'\\''/ { skip=0 }\n    { print }\n' wp-config.php > wp-config.tmp && mv wp-config.tmp wp-config.php && \\\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: * && \\\nwp core install --allow-root --url=https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com --title={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} --admin_user='adm{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}' --admin_password='{{ $('Password WordPress').item.json.password }}' --admin_email=dev@bigmomo.com","cwd":"=/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html/"},"type":"n8n-nodes-base.ssh","typeVersion":1,"position":[208,448],"id":"2a34f981-1e5d-458d-8363-06af7e37f40a","name":"Download and Install WordPress","credentials":{"sshPrivateKey":{"id":"frXf9ANn8NmhbXiY","name":"ssh - bigmomo-stg - root"}},"onError":"continueRegularOutput"},{"parameters":{"authentication":"privateKey","command":"=uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql create_database name='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql create_user name='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' password='{{ $('Password MySQL').item.json.password }}' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql set_privileges_on_database user='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' database='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' privileges=ALL%20PRIVILEGES && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} DirectoryPrivacy configure_directory_protection dir='/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html' enabled='1' authname='Protected' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} DirectoryPrivacy add_user dir='/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html' user='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}' password='{{ $('Password BasicAuth').item.json.password }}'"},"type":"n8n-nodes-base.ssh","typeVersion":1,"position":[800,224],"id":"21e08833-520b-4963-aff2-8266e25cf1f7","name":"Create MySQL & Protect directory","credentials":{"sshPrivateKey":{"id":"frXf9ANn8NmhbXiY","name":"ssh - bigmomo-stg - root"}},"onError":"continueRegularOutput"},{"parameters":{"jsCode":"// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[0,224],"id":"f484ebfb-13bd-447c-9f18-b26055d3e94d","name":"Password cPanel"},{"parameters":{"jsCode":"// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[608,224],"id":"153a56e5-b1ec-4841-934e-3d8111c9f190","name":"Password BasicAuth"},{"parameters":{"jsCode":"// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[400,224],"id":"b736ebce-f009-4d43-88ab-f9c17f5074bc","name":"Password MySQL"},{"parameters":{"jsCode":"// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[0,448],"id":"edc54003-85ff-4f82-b66c-9839c2cf3911","name":"Password WordPress"},{"parameters":{"method":"POST","url":"https://api.github.com/orgs/bigmomo-vs/repos","authentication":"predefinedCredentialType","nodeCredentialType":"githubOAuth2Api","sendHeaders":true,"headerParameters":{"parameters":[{"name":"Accept","value":"application/vnd.github+json"},{"name":"X-GitHub-Api-Version","value":"=2022-11-28"}]},"sendBody":true,"bodyParameters":{"parameters":[{"name":"name","value":"=wp-{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}"},{"name":"description","value":"=WordPress for https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com"},{"name":"private","value":"true"}]},"options":{"redirect":{"redirect":{}}}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[400,448],"id":"8643ac88-66c0-43d2-ab91-1f8e7edcda9c","name":"Create Github Repo","credentials":{"githubOAuth2Api":{"id":"uJkV0CFpcnwNlZKl","name":"github - zephir1 and bigmomo-vs"}},"onError":"continueRegularOutput"},{"parameters":{"authentication":"privateKey","command":"=cat > .gitignore << EOL\n#WordPress\nwp-content/uploads\nwp-config.php\nwp-snapshots/\nwp-content/cache/\nwp-content/db.php\n\n#Custom\nerror_log\n.htaccess*\nrobots.txt\n.ftpquota\n.idea/\n.well-known/\n.user.ini\nwp-content/wflogs/\nwp-content/upgrade/\nphp.ini\nwp-content/plugins/easy-wp-smtp/logs/\nwp-content/languages/\nwp-content/.object-cache.ini\nwp-content/object-cache.php\nwp-content/temp-write-test-*\nwp-content/litespeed/\nwp-content/.litespeed_conf.dat\nnode_modules/\nEOL\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: .gitignore && \\\ngit init && \\\ngit add . && \\\ngit commit -m 'feat: 🚀 Initial commit with WordPress installed' && \\\ngit branch -M main && \\\ngit remote add origin git@github.com:bigmomo-vs/wp-{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.git && \\\ngit push -u origin main && \\\ncp -R /home/bigmomo_upgrades_auto/.ssh/ /home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/ && \\\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: /home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/.ssh/","cwd":"=/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html/"},"type":"n8n-nodes-base.ssh","typeVersion":1,"position":[608,448],"id":"1efc1246-dab1-4691-a5bb-379524295cad","name":"Initialize Git Repo and Add SSH keys","credentials":{"sshPrivateKey":{"id":"frXf9ANn8NmhbXiY","name":"ssh - bigmomo-stg - root"}},"onError":"continueRegularOutput"},{"parameters":{"method":"POST","url":"https://api.cloudflare.com/client/v4/zones/9d59d21485b8a0661c9fddeb4d881704/dns_records","authentication":"predefinedCredentialType","nodeCredentialType":"cloudflareApi","sendHeaders":true,"headerParameters":{"parameters":[{"name":"X-Auth-Email","value":"dev@bigmomo.com"}]},"sendBody":true,"bodyParameters":{"parameters":[{"name":"name","value":"={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}"},{"name":"type","value":"NS"},{"name":"content","value":"cpanel-v2-bigmomo-stg-tl.pub.i.brutalsys.net"}]},"options":{}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[1200,224],"id":"dbdf7bb0-94d7-4663-baa9-8852f3d4e669","name":"Create Cloudflare DNS","credentials":{"cloudflareApi":{"id":"tsi3ksA6dwzsRx7R","name":"cloudflare - dev bigmomo"}},"onError":"continueRegularOutput"},{"parameters":{"authentication":"privateKey","command":"=uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL add_autossl_excluded_domains domains='www.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,mail.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpanel.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,webmail.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,webdisk.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpcontacts.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpcalendars.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,autodiscover.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL remove_autossl_excluded_domains domains='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL start_autossl_check"},"type":"n8n-nodes-base.ssh","typeVersion":1,"position":[1392,224],"id":"f731c34b-3f10-434b-b7d1-4a7fe6638f11","name":"AutoSSL on cPanel","credentials":{"sshPrivateKey":{"id":"frXf9ANn8NmhbXiY","name":"ssh - bigmomo-stg - root"}},"onError":"continueRegularOutput"},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"8f67939f-2df5-4d89-88ac-724ff55846fb","leftValue":"={{ $json.assignee.name }}","rightValue":"","operator":{"type":"string","operation":"exists","singleValue":true}},{"id":"2160650e-e64f-475a-8244-a808fc8b3c89","leftValue":"={{ $json.custom_fields.find(field => field.name === \"URL/Project Name (max 16 letras)\")?.text_value }}","rightValue":"","operator":{"type":"string","operation":"notEmpty","singleValue":true}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.if","typeVersion":2.2,"position":[1008,0],"id":"2fbe6f2f-a22f-4c94-8cc4-85e0c1498aa3","name":"If"},{"parameters":{"spaceId":"spaces/AAQAs5SDuMQ","messageUi":{"text":"=⚠️ Worflow de creacion de entorno PRE fallido.\n\nDebes rellenar el campo \"URL/Nombre de proyecto\" en Asana.\n\nTarea: {{ $('Get a task').item.json.permalink_url }}"},"additionalFields":{}},"type":"n8n-nodes-base.googleChat","typeVersion":1,"position":[1200,0],"id":"b9651a37-a1b9-4fd1-8cff-9e9948cf445d","name":"Chat: Fields missing","webhookId":"180a19d7-5784-4a60-9be1-22b1a5e9b8a2","credentials":{"googleApi":{"id":"KsbkO5Zn2sEeZIHn","name":"google service - cristian automomo"}}},{"parameters":{"operation":"sendAndWait","spaceId":"spaces/AAQAs5SDuMQ","message":"=🚀 Nuevo cPanel con WordPress instalado y repositorio creado en GitHub: {{ $('Create Github Repo').item.json.html_url }}\n\n⚙️ cPanel PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password cPanel').item.json.password }}\n\n🗄️ MySQL PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\nPass: {{ $('Password MySQL').item.json.password }}\n\n🔑 Protect PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nURL: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password BasicAuth').item.json.password }}\n\n🎛️ WordPress Admin - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nURL: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com/wp-admin/\nUser: adm{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password MySQL').item.json.password }}\n\nAñade todos los passwords a LastPass y una vez hecho pulsa a continuación:","approvalOptions":{"values":{"approveLabel":"✅Done"}},"options":{"limitWaitTime":{"values":{"resumeAmount":24}},"appendAttribution":false}},"type":"n8n-nodes-base.googleChat","typeVersion":1,"position":[0,672],"id":"ad4710ad-83d0-4c81-9d71-aaed3878d041","name":"Chat: Project created (Save Pass)","webhookId":"180a19d7-5784-4a60-9be1-22b1a5e9b8a2","credentials":{"googleApi":{"id":"KsbkO5Zn2sEeZIHn","name":"google service - cristian automomo"}},"onError":"continueRegularOutput"},{"parameters":{"resource":"taskComment","id":"={{ $('Filter Assignee').item.json.gid }}","text":"=🚀 Entorno PRE creado automáticamente: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com\n\n🔑 Los datos ya están en LastPass.","additionalFields":{}},"type":"n8n-nodes-base.asana","typeVersion":1,"position":[208,672],"id":"c6ef1ab1-d9b8-47f0-b314-e7bbefd317d2","name":"Add Comment to Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"asana - cristian bigmomo"}}},{"parameters":{"operation":"update","id":"={{ $('Filter Assignee').item.json.gid }}","otherProperties":{"completed":true}},"type":"n8n-nodes-base.asana","typeVersion":1,"position":[400,672],"id":"c3ba0625-0390-4a68-873c-ad0ac0e982b5","name":"Complete task in Asana","credentials":{"asanaApi":{"id":"vNnjWz0xBzSlIfUG","name":"asana - cristian bigmomo"}}},{"parameters":{"amount":1,"unit":"minutes"},"type":"n8n-nodes-base.wait","typeVersion":1.1,"position":[1008,224],"id":"e669cdc0-42d4-4897-943c-19bef2a7eff9","name":"Wait","webhookId":"ffa3198e-a717-4069-bb17-47c662651de0"}],"connections":{"Get a task":{"main":[[{"node":"Filter Assignee","type":"main","index":0}]]},"Search Tasks":{"main":[[{"node":"Filter Name","type":"main","index":0}]]},"Filter Name":{"main":[[{"node":"Get a task","type":"main","index":0}]]},"Schedule Trigger":{"main":[[{"node":"Search Tasks","type":"main","index":0}]]},"Filter Assignee":{"main":[[{"node":"If","type":"main","index":0}]]},"Create cPanel Account":{"main":[[{"node":"Password MySQL","type":"main","index":0}]]},"Download and Install WordPress":{"main":[[{"node":"Create Github Repo","type":"main","index":0}]]},"Create MySQL & Protect directory":{"main":[[{"node":"Wait","type":"main","index":0}]]},"Password cPanel":{"main":[[{"node":"Create cPanel Account","type":"main","index":0}]]},"Password BasicAuth":{"main":[[{"node":"Create MySQL & Protect directory","type":"main","index":0}]]},"Password MySQL":{"main":[[{"node":"Password BasicAuth","type":"main","index":0}]]},"Password WordPress":{"main":[[{"node":"Download and Install WordPress","type":"main","index":0}]]},"Create Github Repo":{"main":[[{"node":"Initialize Git Repo and Add SSH keys","type":"main","index":0}]]},"Initialize Git Repo and Add SSH keys":{"main":[[{"node":"Chat: Project created (Save Pass)","type":"main","index":0}]]},"Create Cloudflare DNS":{"main":[[{"node":"AutoSSL on cPanel","type":"main","index":0}]]},"AutoSSL on cPanel":{"main":[[{"node":"Password WordPress","type":"main","index":0}]]},"If":{"main":[[{"node":"Password cPanel","type":"main","index":0}],[{"node":"Chat: Fields missing","type":"main","index":0}]]},"Chat: Project created (Save Pass)":{"main":[[{"node":"Add Comment to Asana","type":"main","index":0}]]},"Add Comment to Asana":{"main":[[{"node":"Complete task in Asana","type":"main","index":0}]]},"Wait":{"main":[[{"node":"Create Cloudflare DNS","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","saveExecutionProgress":true,"callerPolicy":"workflowsFromSameOwner","availableInMCP":false,"errorWorkflow":"8vgwakbL7IcugV2b","timeSavedPerExecution":60},"staticData":{"node:Schedule Trigger":{"recurrenceRules":[]}},"meta":{"templateCredsSetupCompleted":true},"pinData":{},"versionId":"f6456aa9-2257-4fed-8430-88eaf801ebba","triggerCount":1,"shared":[{"updatedAt":"2025-10-24T09:38:49.985Z","createdAt":"2025-10-24T09:38:49.985Z","role":"workflow:owner","workflowId":"DA9AybPHTp5Vt7Oj","projectId":"rGXkia6aVrtkTfUq"}],"tags":[]}
+{
+  "updatedAt": "2025-11-03T20:59:50.000Z",
+  "createdAt": "2025-10-24T09:38:49.979Z",
+  "id": "DA9AybPHTp5Vt7Oj",
+  "name": "asana - create pre environment",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "id": "={{ $json.gid }}"
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        608,
+        0
+      ],
+      "id": "43c2232c-c034-4833-a940-c3ad01aed8b6",
+      "name": "Get a task",
+      "retryOnFail": true,
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "workspace": "43540521088120",
+        "searchTaskProperties": {
+          "text": "Crear entorno de PRE"
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "682c5062-5a48-4844-be56-bf6ed36849fa",
+      "name": "Search Tasks",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "96ad302b-1758-4363-ab8e-9367934051b1",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "Crear entorno de PRE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c8477889-7137-4d50-8c76-553153afe0f7",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "efd4088f-1040-4ce7-8eaa-59f12055369a",
+      "name": "Filter Name"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "triggerAtHour": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "797c7b6a-e168-4638-ad84-31cbb213afcd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c437f61-b786-424d-b9d7-e843bae382ed",
+              "leftValue": "={{ $json.assignee.name }}",
+              "rightValue": "Cristian Alcaraz",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "621d7333-a632-4339-87e0-b91ff388821a",
+              "leftValue": "={{ $json.completed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "a8bab44d-2f43-4fa6-a11c-bb728ddaf79a",
+      "name": "Filter Assignee"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=whmapi1 createacct domain={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com username={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} password=\"{{ $json.password }}\" enable_shell=1 contactemail=dev@bigmomo.com --output=xml "
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "2c482c5a-3221-4ce8-9c6e-d62c845bf39e",
+      "name": "Create cPanel Account",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "frXf9ANn8NmhbXiY",
+          "name": "ssh - bigmomo-stg - root"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=wp core download --allow-root --locale=es_ES && \\\ncp wp-config-sample.php wp-config.php && \\\nWP_KEYS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt/) && \\\ncp wp-config-sample.php wp-config.php && \\\nawk -v db_name=\"{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\" -v db_user=\"{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\" -v db_pass=\"{{ $('Password MySQL').item.json.password }}\" -v keys=\"$WP_KEYS\" '\n    /database_name_here/ { gsub(\"database_name_here\", db_name) }\n    /username_here/ { gsub(\"username_here\", db_user) }\n    /password_here/ { gsub(\"password_here\", db_pass) }\n    /define\\( *'\\''AUTH_KEY'\\''/ { print keys; skip=1; next }\n    skip == 1 && /put your unique phrase here/ { next }\n    /define\\( *'\\''NONCE_SALT'\\''/ { skip=0 }\n    { print }\n' wp-config.php > wp-config.tmp && mv wp-config.tmp wp-config.php && \\\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: * && \\\nwp core install --allow-root --url=https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com --title={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} --admin_user='adm{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}' --admin_password='{{ $('Password WordPress').item.json.password }}' --admin_email=dev@bigmomo.com",
+        "cwd": "=/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html/"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        208,
+        448
+      ],
+      "id": "2a34f981-1e5d-458d-8363-06af7e37f40a",
+      "name": "Download and Install WordPress",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "frXf9ANn8NmhbXiY",
+          "name": "ssh - bigmomo-stg - root"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql create_database name='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql create_user name='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' password='{{ $('Password MySQL').item.json.password }}' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} Mysql set_privileges_on_database user='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' database='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre' privileges=ALL%20PRIVILEGES && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} DirectoryPrivacy configure_directory_protection dir='/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html' enabled='1' authname='Protected' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} DirectoryPrivacy add_user dir='/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html' user='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}' password='{{ $('Password BasicAuth').item.json.password }}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        800,
+        224
+      ],
+      "id": "21e08833-520b-4963-aff2-8266e25cf1f7",
+      "name": "Create MySQL & Protect directory",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "frXf9ANn8NmhbXiY",
+          "name": "ssh - bigmomo-stg - root"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        224
+      ],
+      "id": "f484ebfb-13bd-447c-9f18-b26055d3e94d",
+      "name": "Password cPanel"
+    },
+    {
+      "parameters": {
+        "jsCode": "// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        224
+      ],
+      "id": "153a56e5-b1ec-4841-934e-3d8111c9f190",
+      "name": "Password BasicAuth"
+    },
+    {
+      "parameters": {
+        "jsCode": "// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        224
+      ],
+      "id": "b736ebce-f009-4d43-88ab-f9c17f5074bc",
+      "name": "Password MySQL"
+    },
+    {
+      "parameters": {
+        "jsCode": "// passwordOptions contains all necessary string data needed to generate the password\nconst passwordOptions = {\n  num: \"1234567890\",\n  specialChar: \"!@#%*+-<=>_\",\n  lowerCase: \"abcdefghijklmnopqrstuvwxyz\",\n  upperCase: \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n};\n\n// Executes when button is clicked\nlet generatePassword = function() {\n\n  // initial state for password information\n  let passInfo = \"\";\n  // list of chosen characters\n  const passChars = [];\n\n  // ask user for the length of their password\n  let characterAmount = 18;\n  \n  // add numerical characters to password data \n  passInfo += passwordOptions.num;\n  // add a number to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.num));\n\n  // add special characters to password data\n  passInfo += passwordOptions.specialChar;\n  // add a special character to the array of chosen characters\n  passChars.push(getRandomChar(passwordOptions.specialChar));\n\n  // add lowercase characters to password data\n  passInfo += passwordOptions.lowerCase;\n  // add a lowercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.lowerCase));\n\n  // add uppercase characters to password data \n  passInfo += passwordOptions.upperCase;\n  // add a uppercase character to the list of chosen characters\n  passChars.push(getRandomChar(passwordOptions.upperCase));\n\n  // while/if there aren't enough characters \n  while (passChars.length < characterAmount) {\n    // pick a random character from passInfo\n    passChars.push(getRandomChar(passInfo));\n  };\n\n  // shuffling the list of characters using Fisher-Yates algorithm\n  for (let i = passChars.length - 1; i > 0; i--) {\n    const swapIndex = Math.floor(Math.random() * (i + 1));\n    const temp = passChars[i];\n    passChars[i] = passChars[swapIndex];\n    passChars[swapIndex] = temp;\n  };\n\n  // return the password character array concatenated to a string\n  return passChars.join(\"\");\n};\n\n// getRandomChar pulls from the passChars array, fromString processes the value\nlet getRandomChar = function(fromString) {\n  return fromString[Math.floor(Math.random() * fromString.length)];\n}\n\nlet password = generatePassword();\n\nreturn [{ json: { password } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        448
+      ],
+      "id": "edc54003-85ff-4f82-b66c-9839c2cf3911",
+      "name": "Password WordPress"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/orgs/bigmomo-vs/repos",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "=2022-11-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "=wp-{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}"
+            },
+            {
+              "name": "description",
+              "value": "=WordPress for https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com"
+            },
+            {
+              "name": "private",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        448
+      ],
+      "id": "8643ac88-66c0-43d2-ab91-1f8e7edcda9c",
+      "name": "Create Github Repo",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "uJkV0CFpcnwNlZKl",
+          "name": "github - zephir1 and bigmomo-vs"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=cat > .gitignore << EOL\n#WordPress\nwp-content/uploads\nwp-config.php\nwp-snapshots/\nwp-content/cache/\nwp-content/db.php\n\n#Custom\nerror_log\n.htaccess*\nrobots.txt\n.ftpquota\n.idea/\n.well-known/\n.user.ini\nwp-content/wflogs/\nwp-content/upgrade/\nphp.ini\nwp-content/plugins/easy-wp-smtp/logs/\nwp-content/languages/\nwp-content/.object-cache.ini\nwp-content/object-cache.php\nwp-content/temp-write-test-*\nwp-content/litespeed/\nwp-content/.litespeed_conf.dat\nnode_modules/\nEOL\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: .gitignore && \\\ngit init && \\\ngit add . && \\\ngit commit -m 'feat: 🚀 Initial commit with WordPress installed' && \\\ngit branch -M main && \\\ngit remote add origin git@github.com:bigmomo-vs/wp-{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.git && \\\ngit push -u origin main && \\\ncp -R /home/bigmomo_upgrades_auto/.ssh/ /home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/ && \\\nchown -R {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}: /home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/.ssh/",
+        "cwd": "=/home/{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}/public_html/"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        608,
+        448
+      ],
+      "id": "1efc1246-dab1-4691-a5bb-379524295cad",
+      "name": "Initialize Git Repo and Add SSH keys",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "frXf9ANn8NmhbXiY",
+          "name": "ssh - bigmomo-stg - root"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudflare.com/client/v4/zones/9d59d21485b8a0661c9fddeb4d881704/dns_records",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "cloudflareApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Auth-Email",
+              "value": "dev@bigmomo.com"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}"
+            },
+            {
+              "name": "type",
+              "value": "NS"
+            },
+            {
+              "name": "content",
+              "value": "cpanel-v2-bigmomo-stg-tl.pub.i.brutalsys.net"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        224
+      ],
+      "id": "dbdf7bb0-94d7-4663-baa9-8852f3d4e669",
+      "name": "Create Cloudflare DNS",
+      "credentials": {
+        "cloudflareApi": {
+          "id": "tsi3ksA6dwzsRx7R",
+          "name": "cloudflare - dev bigmomo"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL add_autossl_excluded_domains domains='www.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,mail.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpanel.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,webmail.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,webdisk.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpcontacts.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,cpcalendars.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com,autodiscover.{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL remove_autossl_excluded_domains domains='{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com' && uapi --output=jsonpretty --user={{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }} SSL start_autossl_check"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        224
+      ],
+      "id": "f731c34b-3f10-434b-b7d1-4a7fe6638f11",
+      "name": "AutoSSL on cPanel",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "frXf9ANn8NmhbXiY",
+          "name": "ssh - bigmomo-stg - root"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8f67939f-2df5-4d89-88ac-724ff55846fb",
+              "leftValue": "={{ $json.assignee.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "2160650e-e64f-475a-8244-a808fc8b3c89",
+              "leftValue": "={{ $json.custom_fields.find(field => field.name === \"URL/Project Name (max 16 letras)\")?.text_value }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "2fbe6f2f-a22f-4c94-8cc4-85e0c1498aa3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "spaceId": "spaces/AAQAs5SDuMQ",
+        "messageUi": {
+          "text": "=⚠️ Worflow de creacion de entorno PRE fallido.\n\nDebes rellenar el campo \"URL/Nombre de proyecto\" en Asana.\n\nTarea: {{ $('Get a task').item.json.permalink_url }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "b9651a37-a1b9-4fd1-8cff-9e9948cf445d",
+      "name": "Chat: Fields missing",
+      "webhookId": "180a19d7-5784-4a60-9be1-22b1a5e9b8a2",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "google service - cristian automomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "spaceId": "spaces/AAQAs5SDuMQ",
+        "message": "=🚀 Nuevo cPanel con WordPress instalado y repositorio creado en GitHub: {{ $('Create Github Repo').item.json.html_url }}\n\n⚙️ cPanel PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password cPanel').item.json.password }}\n\n🗄️ MySQL PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}_pre\nPass: {{ $('Password MySQL').item.json.password }}\n\n🔑 Protect PRE - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nURL: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com\nUser: {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password BasicAuth').item.json.password }}\n\n🎛️ WordPress Admin - {{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nURL: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com/wp-admin/\nUser: adm{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}\nPass: {{ $('Password MySQL').item.json.password }}\n\nAñade todos los passwords a LastPass y una vez hecho pulsa a continuación:",
+        "approvalOptions": {
+          "values": {
+            "approveLabel": "✅Done"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 24
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        0,
+        672
+      ],
+      "id": "ad4710ad-83d0-4c81-9d71-aaed3878d041",
+      "name": "Chat: Project created (Save Pass)",
+      "webhookId": "180a19d7-5784-4a60-9be1-22b1a5e9b8a2",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "google service - cristian automomo"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "taskComment",
+        "id": "={{ $('Filter Assignee').item.json.gid }}",
+        "text": "=🚀 Entorno PRE creado automáticamente: https://{{ $('Get a task').item.json.custom_fields.find(field => field.name === \"URL/Project Name\")?.text_value }}.bigmomo.com\n\n🔑 Los datos ya están en LastPass.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        208,
+        672
+      ],
+      "id": "c6ef1ab1-d9b8-47f0-b314-e7bbefd317d2",
+      "name": "Add Comment to Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ $('Filter Assignee').item.json.gid }}",
+        "otherProperties": {
+          "completed": true
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        400,
+        672
+      ],
+      "id": "c3ba0625-0390-4a68-873c-ad0ac0e982b5",
+      "name": "Complete task in Asana",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        224
+      ],
+      "id": "e669cdc0-42d4-4897-943c-19bef2a7eff9",
+      "name": "Wait",
+      "webhookId": "ffa3198e-a717-4069-bb17-47c662651de0"
+    }
+  ],
+  "connections": {
+    "Get a task": {
+      "main": [
+        [
+          {
+            "node": "Filter Assignee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Tasks": {
+      "main": [
+        [
+          {
+            "node": "Filter Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Name": {
+      "main": [
+        [
+          {
+            "node": "Get a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Assignee": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create cPanel Account": {
+      "main": [
+        [
+          {
+            "node": "Password MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download and Install WordPress": {
+      "main": [
+        [
+          {
+            "node": "Create Github Repo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create MySQL & Protect directory": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Password cPanel": {
+      "main": [
+        [
+          {
+            "node": "Create cPanel Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Password BasicAuth": {
+      "main": [
+        [
+          {
+            "node": "Create MySQL & Protect directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Password MySQL": {
+      "main": [
+        [
+          {
+            "node": "Password BasicAuth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Password WordPress": {
+      "main": [
+        [
+          {
+            "node": "Download and Install WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Github Repo": {
+      "main": [
+        [
+          {
+            "node": "Initialize Git Repo and Add SSH keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Git Repo and Add SSH keys": {
+      "main": [
+        [
+          {
+            "node": "Chat: Project created (Save Pass)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Cloudflare DNS": {
+      "main": [
+        [
+          {
+            "node": "AutoSSL on cPanel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AutoSSL on cPanel": {
+      "main": [
+        [
+          {
+            "node": "Password WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Password cPanel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chat: Fields missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat: Project created (Save Pass)": {
+      "main": [
+        [
+          {
+            "node": "Add Comment to Asana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Comment to Asana": {
+      "main": [
+        [
+          {
+            "node": "Complete task in Asana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Create Cloudflare DNS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "8vgwakbL7IcugV2b",
+    "timeSavedPerExecution": 60
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f6456aa9-2257-4fed-8430-88eaf801ebba",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-24T09:38:49.985Z",
+      "createdAt": "2025-10-24T09:38:49.985Z",
+      "role": "workflow:owner",
+      "workflowId": "DA9AybPHTp5Vt7Oj",
+      "projectId": "rGXkia6aVrtkTfUq"
+    }
+  ],
+  "tags": [],
+  "kebabName": "asana-create-pre-environment"
+}
