@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-10-28T23:04:59.000Z",
+  "updatedAt": "2025-11-04T20:41:19.000Z",
   "createdAt": "2025-10-24T09:35:58.251Z",
   "id": "JUSYRbe45rvkCWkk",
   "name": "(ai) gmail - triage of labels",
@@ -17,8 +17,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        240,
-        0
+        384,
+        16
       ],
       "id": "ea6a41d5-5135-4a68-a6e0-e1739c802703",
       "name": "AI Agent"
@@ -34,14 +34,14 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.1,
       "position": [
-        448,
+        656,
         224
       ],
       "webhookId": "e7289911-d937-45bd-9e91-410a0dc959f8",
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -55,7 +55,7 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.1,
       "position": [
-        576,
+        784,
         224
       ],
       "id": "cab6834e-75a3-4552-8913-d62b9a533677",
@@ -64,7 +64,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -78,7 +78,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        80,
+        288,
         224
       ],
       "id": "75fd2b00-306d-44a2-93b2-0c65457046d2",
@@ -86,7 +86,7 @@
       "credentials": {
         "googlePalmApi": {
           "id": "4opOWz4CcbsKpSMm",
-          "name": "Google Gemini(PaLM) Api - bigmomo"
+          "name": "gemini palm - cristian bigmomo"
         }
       }
     },
@@ -116,7 +116,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -128,7 +128,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        272,
+        480,
         224
       ],
       "id": "daae125e-53b8-49b7-bce5-59ce5c6a5df2",
@@ -142,7 +142,7 @@
       "type": "n8n-nodes-base.gmailTool",
       "typeVersion": 2.1,
       "position": [
-        720,
+        928,
         224
       ],
       "id": "2522b2e3-56db-49ff-8728-7106d47f9d95",
@@ -151,9 +151,22 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        176,
+        0
+      ],
+      "id": "14f1b535-add6-4682-b687-dc83866abbcb",
+      "name": "Loop Over Items"
     }
   ],
   "connections": {
@@ -161,7 +174,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -222,6 +235,29 @@
           }
         ]
       ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -233,10 +269,9 @@
   "staticData": {
     "node:Gmail Trigger": {
       "Gmail Trigger": {
-        "lastTimeChecked": 1762280977,
+        "lastTimeChecked": 1762290582,
         "possibleDuplicates": [
-          "19a5021b86e8649a",
-          "19a4fb6ecf086a9a"
+          "19a50b44dd0e4de1"
         ]
       }
     }
@@ -245,7 +280,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "125a2980-02e1-4fd3-83c9-e86b4fb33db5",
+  "versionId": "933b75e5-4fa2-47d0-bffd-5b63db34c4d1",
   "triggerCount": 1,
   "shared": [
     {
