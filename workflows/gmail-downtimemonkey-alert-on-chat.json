@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-03T21:15:05.000Z",
+  "updatedAt": "2025-11-05T11:47:08.000Z",
   "createdAt": "2025-10-24T09:37:32.422Z",
   "id": "EXlYE3246NzjH9r9",
   "name": "gmail - downtimemonkey alert on chat",
@@ -172,7 +172,8 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
     "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 1
+    "timeSavedPerExecution": 1,
+    "saveDataSuccessExecution": "none"
   },
   "staticData": {
     "node:Gmail Trigger": {
@@ -191,7 +192,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9fc8eb98-28f6-4814-b4b5-8dc15ad47523",
+  "versionId": "75debe0c-119f-4746-8233-0cc65adc8bd0",
   "triggerCount": 1,
   "shared": [
     {
