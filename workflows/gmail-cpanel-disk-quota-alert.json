@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-04T21:50:40.000Z",
+  "updatedAt": "2025-11-05T22:27:42.007Z",
   "createdAt": "2025-11-04T18:06:56.892Z",
   "id": "SGjpWeocM7Ap7Mrz",
   "name": "gmail - cpanel disk quota alert",
@@ -409,20 +409,18 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 15
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Gmail Trigger - cPanel": {
-      "Gmail Trigger - cPanel": {}
+      "Gmail Trigger - cPanel": {
+        "lastTimeChecked": 1762381662
+      }
     }
   },
   "meta": null,
   "pinData": {},
-  "versionId": "7c280561-a35f-47f1-9bee-dc2c5d44fd40",
+  "versionId": "4d664cc8-ff16-4d5d-a75e-f50e7d36c1da",
   "triggerCount": 1,
   "shared": [
     {
