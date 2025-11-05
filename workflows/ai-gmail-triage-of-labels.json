@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-04T20:41:19.000Z",
+  "updatedAt": "2025-11-05T22:27:42.761Z",
   "createdAt": "2025-10-24T09:35:58.251Z",
   "id": "JUSYRbe45rvkCWkk",
   "name": "(ai) gmail - triage of labels",
@@ -261,18 +261,12 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "timeSavedPerExecution": 1
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Gmail Trigger": {
       "Gmail Trigger": {
-        "lastTimeChecked": 1762342601,
-        "possibleDuplicates": [
-          "19a53ce75ea81422"
-        ]
+        "lastTimeChecked": 1762381662
       }
     }
   },
@@ -280,7 +274,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "933b75e5-4fa2-47d0-bffd-5b63db34c4d1",
+  "versionId": "8ffeacca-59bd-4d16-89aa-3ecca4cfb219",
   "triggerCount": 1,
   "shared": [
     {
