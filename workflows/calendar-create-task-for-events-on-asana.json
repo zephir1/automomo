@@ -1,11 +1,22 @@
 {
-  "updatedAt": "2025-11-05T11:39:20.000Z",
+  "updatedAt": "2025-11-05T22:39:01.000Z",
   "createdAt": "2025-10-28T22:59:05.737Z",
   "id": "plhyq6EOaWhnOrXL",
   "name": "calendar - create task for events on asana",
   "active": true,
   "isArchived": false,
   "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        192
+      ],
+      "id": "manual-trigger-sync",
+      "name": "Manual Trigger (Initial Sync)"
+    },
     {
       "parameters": {
         "pollTimes": {
@@ -27,11 +38,11 @@
       "type": "n8n-nodes-base.googleCalendarTrigger",
       "typeVersion": 1,
       "position": [
-        -224,
-        0
+        -640,
+        -128
       ],
-      "id": "fcda2e3b-55b3-4acf-8713-85d2db0b3f83",
-      "name": "Google Calendar Trigger",
+      "id": "trigger-event-created",
+      "name": "Calendar: Event Created",
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
@@ -41,37 +52,462 @@
     },
     {
       "parameters": {
-        "workspace": "43540521088120",
-        "name": "=|Meeting| {{ $json.summary }}",
-        "otherProperties": {
-          "assignee": "=cristian.alcaraz@bigmomo.com",
-          "due_on": "={{ $json.start.dateTime }}",
-          "notes": "=Mensaje:\n{{ $json.description }}\n\nCreado por: {{ $json.organizer.displayName }}\nEnlace Meet: {{ $json.hangoutLink }}\nEnlace Calendar: {{ $json.htmlLink }}",
-          "projects": "=Sprint - DEV"
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "triggerOn": "eventUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        32
+      ],
+      "id": "trigger-event-updated",
+      "name": "Calendar: Event Updated",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "google calendar - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ Object.keys($input.item.json).length }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "787b31b8-5294-4949-ab89-b3c7d7393b19"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "manual"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "34f11b33-9883-4865-948b-e60cedb4d0e0",
+                    "leftValue": "={{ $json.timestamp }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "manual"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ Object.keys($input.item.json).length }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "notEquals"
+                    },
+                    "id": "af42c588-4de3-4f30-bb4a-7a995cbeee7a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "automatic"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -448,
+        48
+      ],
+      "id": "switch-trigger-type",
+      "name": "Switch: Trigger Type"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "opt_fields": [
+            "gid",
+            "name",
+            "resource_type",
+            "completed",
+            "assignee",
+            "custom_fields"
+          ],
+          "project": "=1205839875615843",
+          "completed_since": "={{ DateTime.now().format('yyyy-MM-dd') }}"
         }
       },
       "type": "n8n-nodes-base.asana",
       "typeVersion": 1,
       "position": [
-        144,
-        0
+        80,
+        96
       ],
-      "id": "004acadc-2bd0-404c-8876-88fe02b0a5e2",
-      "name": "Create a task",
+      "id": "get-all-sprint-tasks",
+      "name": "Get All Sprint Tasks",
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
           "name": "asana - cristian bigmomo"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Helper function to determine event type based on summary and attendees\nfunction getEventType(calendarEvent) {\n  const summary = calendarEvent.summary || '';\n  const attendees = calendarEvent.attendees || [];\n  \n  // Check if it's OOO (Out of Office)\n  if (summary.includes('OOO')) {\n    return 'OOO';\n  }\n  \n  // Check number of attendees (more than 1 = Meeting, 1 or 0 = Focus)\n  if (attendees.length > 1) {\n    return 'Meeting';\n  } else {\n    return 'Focus';\n  }\n}\n\n// Get all tasks from Asana (these come in $input)\nconst tasks = $input.all();\n\n// Filter only tasks that start with |Meeting|, |Focus| or |OOO|\nconst eventTasks = tasks.filter(task => {\n  if (!task.json.name) return false;\n  \n  return task.json.name.startsWith('|Meeting|') || \n         task.json.name.startsWith('|Focus|') || \n         task.json.name.startsWith('|OOO|');\n});\n\n// Get all calendar events - check both automatic trigger and manual/schedule path\nlet calendarEvents = [];\ntry {\n  // Try to get from manual/schedule path (Get many events node)\n  calendarEvents = $('Get many events').all();\n} catch (e) {\n  // If that fails, we're in automatic mode - get from Switch node\n  calendarEvents = $('Switch: Trigger Type').all();\n}\n\n// Filter out events that start with \"Sistemas: guardia\"\nconst filteredEvents = calendarEvents.filter(eventItem => {\n  const summary = eventItem.json.summary || '';\n  return !summary.startsWith('Sistemas: guardia');\n});\n\n// For each calendar event, find matching task or mark as new\nconst results = filteredEvents.map(eventItem => {\n  const calendarEvent = eventItem.json;\n  const calendarEventId = calendarEvent.id;\n  const eventType = getEventType(calendarEvent);\n  \n  const matchingTask = eventTasks.find(task => {\n    if (!task.json.custom_fields) return false;\n    \n    const calendarField = task.json.custom_fields.find(field => \n      field.name === 'Calendar Event ID'\n    );\n    \n    return calendarField && calendarField.text_value === calendarEventId;\n  });\n  \n  // Return task with calendar event data and event type\n  if (matchingTask) {\n    return { json: { ...matchingTask.json, calendarEvent, eventType } };\n  } else {\n    return { json: { gid: null, calendarEvent, eventType } };\n  }\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        96
+      ],
+      "id": "filter-by-calendar-event-id",
+      "name": "Filter by Calendar Event ID"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "exists-check",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.gid !== undefined && $json.gid !== null }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        496,
+        96
+      ],
+      "id": "if-task-exists",
+      "name": "IF: Task Exists?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ $json.gid }}",
+        "otherProperties": {
+          "assignee_status": "={{ $json.eventType === 'OOO' ? 'later' : 'inbox' }}",
+          "due_on": "={{ $json.calendarEvent.start.dateTime }}",
+          "name": "=|{{ $json.eventType }}| {{ $json.calendarEvent.summary }}",
+          "notes": "={{ [\n  $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n  $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n  $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n  'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n  $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n].filter(n => n !== null).join('\\n\\n') }}"
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        752,
+        -16
+      ],
+      "id": "update-task",
+      "name": "Update Task",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workspace": "43540521088120",
+        "name": "=|{{ $json.eventType }}| {{ $json.calendarEvent.summary }}",
+        "otherProperties": {
+          "assignee": "=cristian.alcaraz@bigmomo.com",
+          "assignee_status": "={{ $json.eventType === 'OOO' ? 'later' : 'inbox' }}",
+          "due_on": "={{ $json.calendarEvent.start.dateTime }}",
+          "notes": "={{ [\n  $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n  $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n  $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n  'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n  $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n].filter(n => n !== null).join('\\n\\n') }}",
+          "projects": "=1205839875615843"
+        }
+      },
+      "type": "n8n-nodes-base.asana",
+      "typeVersion": 1,
+      "position": [
+        752,
+        192
+      ],
+      "id": "004acadc-2bd0-404c-8876-88fe02b0a5e2",
+      "name": "Create Task",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://app.asana.com/api/1.0/tasks/{{ $json.gid }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "asanaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  data: {\n    custom_fields: {\n      '1211848632360890': $json.calendarEventId\n    }\n  }\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        192
+      ],
+      "id": "set-calendar-event-id",
+      "name": "Set Calendar Event ID",
+      "credentials": {
+        "asanaApi": {
+          "id": "vNnjWz0xBzSlIfUG",
+          "name": "asana - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "cristian.alcaraz@bigmomo.com",
+          "mode": "list",
+          "cachedResultName": "cristian.alcaraz@bigmomo.com"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        -16
+      ],
+      "id": "78bf22ad-1971-42f2-b47a-77cd27403e01",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "777xDlCIv6BtISa9",
+          "name": "google calendar - cristian bigmomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -640,
+        352
+      ],
+      "id": "d46ec3cd-435f-4c50-bd5a-506c4f1060c6",
+      "name": "Schedule Trigger"
     }
   ],
   "connections": {
-    "Google Calendar Trigger": {
+    "Manual Trigger (Initial Sync)": {
       "main": [
         [
           {
-            "node": "Create a task",
+            "node": "Switch: Trigger Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar: Event Created": {
+      "main": [
+        [
+          {
+            "node": "Switch: Trigger Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar: Event Updated": {
+      "main": [
+        [
+          {
+            "node": "Switch: Trigger Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Trigger Type": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get All Sprint Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Sprint Tasks": {
+      "main": [
+        [
+          {
+            "node": "Filter by Calendar Event ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by Calendar Event ID": {
+      "main": [
+        [
+          {
+            "node": "IF: Task Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Task Exists?": {
+      "main": [
+        [
+          {
+            "node": "Update Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Task": {
+      "main": [
+        [
+          {
+            "node": "Set Calendar Event ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Get All Sprint Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch: Trigger Type",
             "type": "main",
             "index": 0
           }
@@ -84,19 +520,28 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
     "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 1
+    "timeSavedPerExecution": 5
   },
   "staticData": {
     "node:Google Calendar Trigger": {
-      "lastTimeChecked": "2025-11-05T11:39:20Z"
+      "lastTimeChecked": "2025-11-05T12:22:10Z"
+    },
+    "node:Calendar: Event Created": {
+      "lastTimeChecked": "2025-11-05T22:39:02Z"
+    },
+    "node:Calendar: Event Updated": {
+      "lastTimeChecked": "2025-11-05T22:39:02Z"
+    },
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "07e8d06b-0842-47c4-8931-35354c29da60",
-  "triggerCount": 1,
+  "versionId": "1326364c-47ca-4542-b761-5f56f96066c0",
+  "triggerCount": 3,
   "shared": [
     {
       "updatedAt": "2025-10-28T22:59:05.749Z",
