@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-02T22:15:38.000Z",
+  "updatedAt": "2025-11-05T22:27:41.652Z",
   "createdAt": "2025-10-24T09:32:46.433Z",
   "id": "8vgwakbL7IcugV2b",
   "name": "n8n - error trigger",
@@ -37,7 +37,7 @@
       "credentials": {
         "googleApi": {
           "id": "KsbkO5Zn2sEeZIHn",
-          "name": "Google Service Account - bigmomo"
+          "name": "google service - cristian automomo"
         }
       }
     }
@@ -63,7 +63,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "223371c9-b736-4e01-8b89-bab8d1824224",
+  "versionId": "a161bc70-5c42-4c80-977f-3c775a09257c",
   "triggerCount": 0,
   "shared": [
     {
