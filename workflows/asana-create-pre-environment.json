@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-03T20:59:50.000Z",
+  "updatedAt": "2025-11-05T22:27:41.136Z",
   "createdAt": "2025-10-24T09:38:49.979Z",
   "id": "DA9AybPHTp5Vt7Oj",
   "name": "asana - create pre environment",
@@ -829,12 +829,7 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 60
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -845,7 +840,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f6456aa9-2257-4fed-8430-88eaf801ebba",
+  "versionId": "70d1df7e-bf53-4b45-8c6a-2414a15c1e8f",
   "triggerCount": 1,
   "shared": [
     {
