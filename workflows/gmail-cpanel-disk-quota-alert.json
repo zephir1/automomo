@@ -417,12 +417,7 @@
   },
   "staticData": {
     "node:Gmail Trigger - cPanel": {
-      "Gmail Trigger - cPanel": {
-        "lastTimeChecked": 1761970021,
-        "possibleDuplicates": [
-          "19a507ed3800a4fe"
-        ]
-      }
+      "Gmail Trigger - cPanel": {}
     }
   },
   "meta": null,

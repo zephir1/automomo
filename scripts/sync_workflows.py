@@ -78,6 +78,16 @@ def sync_workflows_to_git():
         # Remove versionCounter (changes on every edit, not meaningful for version control)
         full_workflow.pop('versionCounter', None)
         
+        # Clean up staticData - remove runtime state that changes on every execution
+        if 'staticData' in full_workflow and isinstance(full_workflow['staticData'], dict):
+            for node_key, node_data in full_workflow['staticData'].items():
+                if isinstance(node_data, dict):
+                    for trigger_key, trigger_data in node_data.items():
+                        if isinstance(trigger_data, dict):
+                            # Remove lastTimeChecked and possibleDuplicates
+                            trigger_data.pop('lastTimeChecked', None)
+                            trigger_data.pop('possibleDuplicates', None)
+        
         # Save to file
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(full_workflow, f, indent=2, ensure_ascii=False)
