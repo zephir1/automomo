@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-10-28T23:06:58.000Z",
+  "updatedAt": "2025-11-05T22:27:40.636Z",
   "createdAt": "2025-10-24T13:19:07.582Z",
   "id": "VuJjt8th71dIyzLA",
   "name": "(ai) automomo - productivity agent",
@@ -41,7 +41,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -78,7 +78,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -106,7 +106,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -130,7 +130,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -153,7 +153,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -183,7 +183,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -213,7 +213,7 @@
       "credentials": {
         "gmailOAuth2": {
           "id": "81fW20A5QWw8eLph",
-          "name": "Gmail account - bigmomo"
+          "name": "gmail - cristian bigmomo"
         }
       }
     },
@@ -250,7 +250,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -290,7 +290,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -319,7 +319,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -361,7 +361,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -390,7 +390,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -424,7 +424,7 @@
       "credentials": {
         "googleCalendarOAuth2Api": {
           "id": "777xDlCIv6BtISa9",
-          "name": "Google Calendar account - bigmomo"
+          "name": "google calendar - cristian bigmomo"
         }
       }
     },
@@ -447,7 +447,7 @@
       "credentials": {
         "telegramApi": {
           "id": "eXcrR3IJLRzEjs2W",
-          "name": "Telegram account - cristian momo bot"
+          "name": "telegram - cristian personal - momo bot"
         }
       }
     },
@@ -474,7 +474,7 @@
       "credentials": {
         "googleContactsOAuth2Api": {
           "id": "1Z3XR7jUTY5zSQtH",
-          "name": "Google Contacts - bigmomo"
+          "name": "google contacts - cristian bigmomo"
         }
       }
     },
@@ -499,7 +499,7 @@
       "credentials": {
         "telegramApi": {
           "id": "eXcrR3IJLRzEjs2W",
-          "name": "Telegram account - cristian momo bot"
+          "name": "telegram - cristian personal - momo bot"
         }
       }
     },
@@ -666,7 +666,7 @@
       "credentials": {
         "googlePalmApi": {
           "id": "4opOWz4CcbsKpSMm",
-          "name": "Google Gemini(PaLM) Api - bigmomo"
+          "name": "gemini palm - cristian bigmomo"
         }
       }
     },
@@ -691,7 +691,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -711,7 +711,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -731,7 +731,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -754,7 +754,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -779,7 +779,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -803,7 +803,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -828,7 +828,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -848,7 +848,7 @@
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
-          "name": "Asana account - bigmomo"
+          "name": "asana - cristian bigmomo"
         }
       }
     },
@@ -898,7 +898,7 @@
       "credentials": {
         "googleApi": {
           "id": "KsbkO5Zn2sEeZIHn",
-          "name": "Google Service Account - bigmomo"
+          "name": "google service - cristian automomo"
         }
       }
     },
@@ -1361,11 +1361,7 @@
     }
   },
   "settings": {
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionOrder": "v1",
-    "availableInMCP": false,
-    "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 5
+    "executionOrder": "v1"
   },
   "staticData": null,
   "meta": {
@@ -1373,7 +1369,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "a27088e8-6783-486b-bb7f-ecc53203640c",
+  "versionId": "8fca4b72-ae61-47ec-8be9-015d7b496b88",
   "triggerCount": 2,
   "shared": [
     {
