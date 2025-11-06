@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-05T22:39:01.000Z",
+  "updatedAt": "2025-11-06T10:10:25.000Z",
   "createdAt": "2025-10-28T22:59:05.737Z",
   "id": "plhyq6EOaWhnOrXL",
   "name": "calendar - create task for events on asana",
@@ -254,17 +254,17 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "id": "={{ $json.gid }}",
-        "otherProperties": {
-          "assignee_status": "={{ $json.eventType === 'OOO' ? 'later' : 'inbox' }}",
-          "due_on": "={{ $json.calendarEvent.start.dateTime }}",
-          "name": "=|{{ $json.eventType }}| {{ $json.calendarEvent.summary }}",
-          "notes": "={{ [\n  $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n  $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n  $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n  'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n  $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n].filter(n => n !== null).join('\\n\\n') }}"
-        }
+        "method": "PUT",
+        "url": "=https://app.asana.com/api/1.0/tasks/{{ $json.gid }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "asanaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  data: {\n    name: '|' + $json.eventType + '| ' + $json.calendarEvent.summary,\n    assignee_status: $json.eventType === 'OOO' ? 'later' : 'inbox',\n    due_at: $json.calendarEvent.start.dateTime,\n    notes: [\n      $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n      $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n      $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n      'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n      $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n    ].filter(n => n !== null).join('\\n\\n')\n  }\n}) }}",
+        "options": {}
       },
-      "type": "n8n-nodes-base.asana",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         752,
         -16
@@ -280,50 +280,23 @@
     },
     {
       "parameters": {
-        "workspace": "43540521088120",
-        "name": "=|{{ $json.eventType }}| {{ $json.calendarEvent.summary }}",
-        "otherProperties": {
-          "assignee": "=cristian.alcaraz@bigmomo.com",
-          "assignee_status": "={{ $json.eventType === 'OOO' ? 'later' : 'inbox' }}",
-          "due_on": "={{ $json.calendarEvent.start.dateTime }}",
-          "notes": "={{ [\n  $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n  $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n  $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n  'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n  $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n].filter(n => n !== null).join('\\n\\n') }}",
-          "projects": "=1205839875615843"
-        }
+        "method": "POST",
+        "url": "https://app.asana.com/api/1.0/tasks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "asanaApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  data: {\n    workspace: '43540521088120',\n    projects: ['1205839875615843'],\n    name: '|' + $json.eventType + '| ' + $json.calendarEvent.summary,\n    assignee: 'cristian.alcaraz@bigmomo.com',\n    assignee_status: $json.eventType === 'OOO' ? 'later' : 'inbox',\n    due_at: $json.calendarEvent.start.dateTime,\n    custom_fields: {\n      '1211848632360890': $json.calendarEvent.id\n    },\n    notes: [\n      $json.calendarEvent.description ? 'Mensaje:\\n' + $json.calendarEvent.description : null,\n      $json.calendarEvent.organizer?.displayName ? 'Creado por: ' + $json.calendarEvent.organizer.displayName : null,\n      $json.calendarEvent.hangoutLink ? 'Enlace Meet: ' + $json.calendarEvent.hangoutLink : null,\n      'Enlace Calendar: ' + $json.calendarEvent.htmlLink,\n      $json.eventType === 'OOO' ? '⚠️ OOO: Durante este período no podré atender llamadas, emails ni reuniones.' : null\n    ].filter(n => n !== null).join('\\n\\n')\n  }\n}) }}",
+        "options": {}
       },
-      "type": "n8n-nodes-base.asana",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         752,
         192
       ],
       "id": "004acadc-2bd0-404c-8876-88fe02b0a5e2",
       "name": "Create Task",
-      "credentials": {
-        "asanaApi": {
-          "id": "vNnjWz0xBzSlIfUG",
-          "name": "asana - cristian bigmomo"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://app.asana.com/api/1.0/tasks/{{ $json.gid }}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "asanaApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  data: {\n    custom_fields: {\n      '1211848632360890': $json.calendarEventId\n    }\n  }\n}) }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        960,
-        192
-      ],
-      "id": "set-calendar-event-id",
-      "name": "Set Calendar Event ID",
       "credentials": {
         "asanaApi": {
           "id": "vNnjWz0xBzSlIfUG",
@@ -483,13 +456,7 @@
     },
     "Create Task": {
       "main": [
-        [
-          {
-            "node": "Set Calendar Event ID",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Get many events": {
@@ -516,21 +483,17 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "errorWorkflow": "8vgwakbL7IcugV2b",
-    "timeSavedPerExecution": 5
+    "executionOrder": "v1"
   },
   "staticData": {
     "node:Google Calendar Trigger": {
       "lastTimeChecked": "2025-11-05T12:22:10Z"
     },
     "node:Calendar: Event Created": {
-      "lastTimeChecked": "2025-11-05T22:39:02Z"
+      "lastTimeChecked": "2025-11-06T10:10:25Z"
     },
     "node:Calendar: Event Updated": {
-      "lastTimeChecked": "2025-11-05T22:39:02Z"
+      "lastTimeChecked": "2025-11-06T10:10:25Z"
     },
     "node:Schedule Trigger": {
       "recurrenceRules": []
@@ -540,7 +503,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1326364c-47ca-4542-b761-5f56f96066c0",
+  "versionId": "f395bc3a-c4dd-4650-8807-c50660e8b26c",
   "triggerCount": 3,
   "shared": [
     {
