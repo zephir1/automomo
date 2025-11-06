@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-05T22:27:42.584Z",
+  "updatedAt": "2025-11-06T10:06:10.113Z",
   "createdAt": "2025-11-02T21:18:35.053Z",
   "id": "cGKgzn4cs6RfgQJB",
   "name": "n8n - backup to git",
@@ -510,7 +510,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ef541577-7bb4-4503-8f07-a2dcd867e669",
+  "versionId": "46502fb4-dbb3-491c-9ecc-fd1041b3e5d3",
   "triggerCount": 1,
   "shared": [
     {
