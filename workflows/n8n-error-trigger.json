@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-05T22:27:41.652Z",
+  "updatedAt": "2025-11-06T10:06:10.462Z",
   "createdAt": "2025-10-24T09:32:46.433Z",
   "id": "8vgwakbL7IcugV2b",
   "name": "n8n - error trigger",
@@ -63,7 +63,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "a161bc70-5c42-4c80-977f-3c775a09257c",
+  "versionId": "6d17336e-cbea-4a7a-ad5b-4a408cdc6271",
   "triggerCount": 0,
   "shared": [
     {
