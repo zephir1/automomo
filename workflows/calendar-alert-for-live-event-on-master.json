@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-05T22:27:41.477Z",
+  "updatedAt": "2025-11-06T10:06:08.163Z",
   "createdAt": "2025-10-24T09:40:02.607Z",
   "id": "jNENotoOCHpWRKSn",
   "name": "calendar - alert for live event on master",
@@ -163,7 +163,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b346b60c-fb64-4694-a3b7-8dfaba79e913",
+  "versionId": "2200ae58-d050-45af-a697-c7c6704ba047",
   "triggerCount": 1,
   "shared": [
     {
