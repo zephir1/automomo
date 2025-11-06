@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-05T22:27:42.761Z",
+  "updatedAt": "2025-11-06T10:06:07.442Z",
   "createdAt": "2025-10-24T09:35:58.251Z",
   "id": "JUSYRbe45rvkCWkk",
   "name": "(ai) gmail - triage of labels",
@@ -265,16 +265,14 @@
   },
   "staticData": {
     "node:Gmail Trigger": {
-      "Gmail Trigger": {
-        "lastTimeChecked": 1762381662
-      }
+      "Gmail Trigger": {}
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8ffeacca-59bd-4d16-89aa-3ecca4cfb219",
+  "versionId": "7d5ed5dd-a61d-4b4c-9856-4c832e9e2cf0",
   "triggerCount": 1,
   "shared": [
     {
