@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-06T10:06:10.113Z",
+  "updatedAt": "2025-11-06T10:15:14.000Z",
   "createdAt": "2025-11-02T21:18:35.053Z",
   "id": "cGKgzn4cs6RfgQJB",
   "name": "n8n - backup to git",
@@ -499,7 +499,11 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "8vgwakbL7IcugV2b",
+    "timeSavedPerExecution": 10
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -510,7 +514,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "46502fb4-dbb3-491c-9ecc-fd1041b3e5d3",
+  "versionId": "4cf52416-8e80-496b-b179-f7916aa1db27",
   "triggerCount": 1,
   "shared": [
     {
