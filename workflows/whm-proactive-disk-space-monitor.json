@@ -1,0 +1,539 @@
+{
+  "updatedAt": "2025-11-13T22:59:55.033Z",
+  "createdAt": "2025-11-13T22:00:12.073Z",
+  "id": "m5EFoCSOTPmTscTD",
+  "name": "whm - proactive disk space monitor",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        352
+      ],
+      "id": "schedule-trigger-node",
+      "name": "Schedule Trigger",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "# Lista usuarios de cPanel del owner root (excluye resellers como marficom)\nfor user in $(ls -1 /var/cpanel/users/ | grep -v \"^\\.\"); do\n  owner=$(grep \"^OWNER=\" /var/cpanel/users/$user 2>/dev/null | cut -d= -f2)\n  if [ \"$owner\" = \"root\" ]; then\n    echo \"$user\"\n  fi\ndone"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        464,
+        352
+      ],
+      "id": "ssh-get-users-node",
+      "name": "SSH: Get cPanel Users (Root Only)",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "RpnkLDMZNn3i0YFH",
+          "name": "ssh - bigmomo-1 production - root caution"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convertir la salida de usuarios en un array\nconst output = $input.item.json.stdout || '';\nconst users = output.trim().split('\\n').filter(user => user.trim().length > 0);\n\n// Filtrar usuarios del sistema que no son cuentas web reales\nconst systemUsers = ['root', 'nobody', 'mysql', 'cpanel', 'admin'];\nconst webUsers = users.filter(user => !systemUsers.includes(user));\n\nreturn webUsers.map(user => ({ cpanelUser: user }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        352
+      ],
+      "id": "parse-users-node",
+      "name": "Parse Users List"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        912,
+        352
+      ],
+      "id": "split-batches-node",
+      "name": "Loop Over Users"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=# Análisis exhaustivo de uso de disco para {{ $json.cpanelUser }}\nUSER=\"{{ $json.cpanelUser }}\"\nUSER_HOME=\"/home/${USER}\"\n\necho \"USER: ${USER}\"\necho \"SEPARATOR: ---\"\n\n# Verificar si el directorio existe\nif [ ! -d \"${USER_HOME}\" ]; then\n  echo \"ERROR: Home directory not found\"\n  exit 1\nfi\n\ncd \"${USER_HOME}\" || exit 1\n\n# Uso total del home\necho \"TOTAL_SIZE:\"\ndu -sh . 2>/dev/null | awk '{print $1}'\necho \"\"\n\n# Top 10 directorios más grandes\necho \"TOP_DIRECTORIES:\"\ndu -h --max-depth=1 2>/dev/null | sort -rh | head -10 | awk '{print $1 \" \" $2}'\necho \"\"\n\n# Archivos log grandes (>100MB) - para vaciar\necho \"LARGE_LOGS:\"\nfind . -type f \\( -name \"*.log\" -o -name \"error_log\" -o -name \"*_log\" -o -name \"access_log\" \\) -size +100M -exec ls -lh {} \\; 2>/dev/null | awk '{print $5 \" \" $9}'\necho \"\"\n\n# Archivos log grandes - solo paths para limpieza\necho \"LARGE_LOGS_PATHS:\"\nfind . -type f \\( -name \"*.log\" -o -name \"error_log\" -o -name \"*_log\" -o -name \"access_log\" \\) -size +100M 2>/dev/null\necho \"\"\n\n# Archivos individuales más grandes (>500MB)\necho \"LARGE_FILES:\"\nfind . -type f -size +500M -exec ls -lh {} \\; 2>/dev/null | awk '{print $5 \" \" $9}' | head -20\necho \"\"\n\n# Tamaño de wp-content/uploads si existe\necho \"WP_UPLOADS:\"\nif [ -d \"./public_html/wp-content/uploads\" ]; then\n  du -sh ./public_html/wp-content/uploads 2>/dev/null | awk '{print $1}'\nelse\n  echo \"none\"\nfi\necho \"\"\n\n# Tamaño de sites/default/files si existe (Drupal)\necho \"DRUPAL_FILES:\"\nif [ -d \"./public_html/sites/default/files\" ]; then\n  du -sh ./public_html/sites/default/files 2>/dev/null | awk '{print $1}'\nelse\n  echo \"none\"\nfi\necho \"\"\n\n# Listar backups con detalles\necho \"BACKUPS:\"\nfind . -maxdepth 2 -type d \\( -name \"*backup*\" -o -name \"*bak\" -o -name \"backups\" \\) -exec sh -c 'du -sh \"$1\" 2>/dev/null && stat -c \"%Y %n\" \"$1\" 2>/dev/null' _ {} \\; 2>/dev/null | head -10\necho \"\"\n\n# Dumps SQL grandes (>100MB) - para eliminar\necho \"DB_DUMPS:\"\nfind . -type f \\( -name \"*.sql\" -o -name \"*.sql.gz\" -o -name \"*.sql.bz2\" \\) -size +100M -exec ls -lh {} \\; 2>/dev/null | awk '{print $5 \" \" $9}' | head -10\necho \"\"\n\n# Dumps SQL paths para limpieza\necho \"DB_DUMPS_PATHS:\"\nfind . -type f \\( -name \"*.sql\" -o -name \"*.sql.gz\" -o -name \"*.sql.bz2\" \\) -size +100M 2>/dev/null\necho \"\"\n\n# Tamaño de logs de acceso\necho \"ACCESS_LOGS:\"\nif [ -d \"./access-logs\" ]; then\n  du -sh ./access-logs 2>/dev/null | awk '{print $1}'\nelse\n  echo \"none\"\nfi\necho \"\"\n\n# Tamaño total de emails\necho \"MAIL:\"\nif [ -d \"./mail\" ]; then\n  du -sh ./mail 2>/dev/null | awk '{print $1}'\nelse\n  echo \"none\"\nfi"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        352
+      ],
+      "id": "ssh-analyze-disk-node",
+      "name": "SSH: Analyze User Disk",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "RpnkLDMZNn3i0YFH",
+          "name": "ssh - bigmomo-1 production - root caution"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar el análisis de disco y extraer información relevante\nconst stdout = $input.first().json.stdout || '';\n\n// Extraer usuario del output del SSH (línea \"USER: nombre\")\nconst userMatch = stdout.match(/USER: (.+)/);\nconst user = userMatch ? userMatch[1].trim() : 'unknown';\n\n// Helper para extraer secciones\nfunction extractSection(output, sectionName) {\n  const regex = new RegExp(`${sectionName}:\\\\n([\\\\s\\\\S]*?)(?=\\\\n[A-Z_]+:|$)`);\n  const match = output.match(regex);\n  return match ? match[1].trim() : '';\n}\n\n// Helper para parsear tamaño en bytes aproximados\nfunction sizeToBytes(sizeStr) {\n  if (!sizeStr || sizeStr === 'none') return 0;\n  const match = sizeStr.match(/^([0-9.]+)([KMGT]?)$/);\n  if (!match) return 0;\n  \n  const value = parseFloat(match[1]);\n  const unit = match[2];\n  \n  const multipliers = {\n    'K': 1024,\n    'M': 1024 * 1024,\n    'G': 1024 * 1024 * 1024,\n    'T': 1024 * 1024 * 1024 * 1024\n  };\n  \n  return value * (multipliers[unit] || 1);\n}\n\n// Extraer datos\nconst totalSize = extractSection(stdout, 'TOTAL_SIZE');\nconst largeLogs = extractSection(stdout, 'LARGE_LOGS');\nconst largeLogsPaths = extractSection(stdout, 'LARGE_LOGS_PATHS');\nconst largeFiles = extractSection(stdout, 'LARGE_FILES');\nconst wpUploads = extractSection(stdout, 'WP_UPLOADS');\nconst drupalFiles = extractSection(stdout, 'DRUPAL_FILES');\nconst backups = extractSection(stdout, 'BACKUPS');\nconst dbDumps = extractSection(stdout, 'DB_DUMPS');\nconst dbDumpsPaths = extractSection(stdout, 'DB_DUMPS_PATHS');\nconst accessLogs = extractSection(stdout, 'ACCESS_LOGS');\nconst mail = extractSection(stdout, 'MAIL');\n\n// Parsear logs grandes\nconst largeLogsList = largeLogs.split('\\n').filter(l => l.trim()).map(line => {\n  const parts = line.trim().split(/\\s+/);\n  return { size: parts[0], path: parts.slice(1).join(' ') };\n});\n\n// Paths de logs para limpieza\nconst logsToClean = largeLogsPaths.split('\\n').filter(p => p.trim());\n\n// Parsear archivos grandes\nconst largeFilesList = largeFiles.split('\\n').filter(l => l.trim()).map(line => {\n  const parts = line.trim().split(/\\s+/);\n  return { size: parts[0], path: parts.slice(1).join(' ') };\n});\n\n// Parsear backups con timestamp\nconst backupsLines = backups.split('\\n').filter(l => l.trim());\nconst backupsList = [];\nconst backupsToDelete = [];\n\nfor (let i = 0; i < backupsLines.length; i++) {\n  const line = backupsLines[i];\n  if (line.includes('\\t') || /^[0-9.]+[KMGT]/.test(line)) {\n    // Línea con tamaño\n    const parts = line.split(/\\s+/);\n    const sizeStr = parts[0];\n    const path = parts[1];\n    \n    // Siguiente línea debería tener timestamp\n    if (i + 1 < backupsLines.length) {\n      const nextLine = backupsLines[i + 1];\n      const timestampMatch = nextLine.match(/^([0-9]+)\\s+(.+)/);\n      if (timestampMatch) {\n        const timestamp = parseInt(timestampMatch[1]);\n        const pathFromTimestamp = timestampMatch[2];\n        \n        backupsList.push({ size: sizeStr, path: pathFromTimestamp || path, timestamp: timestamp });\n        i++; // Skip next line\n      } else {\n        backupsList.push({ size: sizeStr, path: path, timestamp: 0 });\n      }\n    } else {\n      backupsList.push({ size: sizeStr, path: path, timestamp: 0 });\n    }\n  }\n}\n\n// Determinar backups a eliminar: antiguos (>30 días) o múltiples (mantener solo el más reciente)\nconst now = Math.floor(Date.now() / 1000);\nconst thirtyDaysAgo = now - (30 * 24 * 60 * 60);\n\nif (backupsList.length > 1) {\n  // Ordenar por timestamp descendente\n  backupsList.sort((a, b) => b.timestamp - a.timestamp);\n  // Eliminar todos excepto el más reciente\n  backupsList.slice(1).forEach(backup => {\n    if (backup.path) backupsToDelete.push(backup.path);\n  });\n} else if (backupsList.length === 1) {\n  // Si hay solo un backup y es antiguo, eliminarlo\n  const backup = backupsList[0];\n  if (backup.timestamp > 0 && backup.timestamp < thirtyDaysAgo) {\n    backupsToDelete.push(backup.path);\n  }\n}\n\n// Parsear dumps SQL\nconst dbDumpsList = dbDumps.split('\\n').filter(l => l.trim()).map(line => {\n  const parts = line.trim().split(/\\s+/);\n  return { size: parts[0], path: parts.slice(1).join(' ') };\n});\n\n// Paths de dumps para limpieza (todos los >100MB)\nconst dumpsToClean = dbDumpsPaths.split('\\n').filter(p => p.trim());\n\n// Determinar issues y qué limpiar\nconst issues = [];\nconst warnings = [];\nconst cleanupActions = [];\n\n// Convertir tamaño total a bytes para comparación\nconst totalBytes = sizeToBytes(totalSize);\nconst totalGB = totalBytes / (1024 * 1024 * 1024);\n\n// Issue: Cuenta muy grande (>20GB)\nif (totalGB > 20) {\n  issues.push(`⚠️ Cuenta muy grande: ${totalSize} (>20GB)`);\n} else if (totalGB > 10) {\n  warnings.push(`📊 Cuenta grande: ${totalSize}`);\n}\n\n// Issue: Logs grandes - marcar para limpieza automática\nif (largeLogsList.length > 0) {\n  issues.push(`🗑️ ${largeLogsList.length} log(s) grande(s) (>100MB) - se vaciarán`);\n  cleanupActions.push('empty_logs');\n}\n\n// Issue: Dumps SQL grandes - marcar para eliminación\nif (dbDumpsList.length > 0) {\n  issues.push(`💿 ${dbDumpsList.length} dump(s) SQL (>100MB) - se eliminarán`);\n  cleanupActions.push('delete_dumps');\n}\n\n// Issue: Backups múltiples o antiguos\nif (backupsToDelete.length > 0) {\n  issues.push(`💾 ${backupsToDelete.length} backup(s) antiguo(s)/redundante(s) - se eliminarán`);\n  cleanupActions.push('delete_backups');\n} else if (backupsList.length > 0 && backupsList[0].size) {\n  const backupBytes = sizeToBytes(backupsList[0].size);\n  if (backupBytes > 5 * 1024 * 1024 * 1024) { // >5GB\n    warnings.push(`💾 Backup ocupa: ${backupsList[0].size}`);\n  }\n}\n\n// Issue: Archivos individuales muy grandes\nif (largeFilesList.length > 0) {\n  issues.push(`📦 ${largeFilesList.length} archivo(s) muy grande(s) (>500MB) - revisar manualmente`);\n}\n\n// Warning: WordPress uploads grandes\nconst wpBytes = sizeToBytes(wpUploads);\nif (wpBytes > 5 * 1024 * 1024 * 1024) { // >5GB\n  warnings.push(`📁 WordPress uploads grande: ${wpUploads}`);\n}\n\n// Warning: Drupal files grandes\nconst drupalBytes = sizeToBytes(drupalFiles);\nif (drupalBytes > 5 * 1024 * 1024 * 1024) { // >5GB\n  warnings.push(`📁 Drupal files grande: ${drupalFiles}`);\n}\n\n// Warning: Access logs grandes\nconst accessLogsBytes = sizeToBytes(accessLogs);\nif (accessLogsBytes > 1 * 1024 * 1024 * 1024) { // >1GB\n  warnings.push(`📝 Access logs: ${accessLogs}`);\n}\n\n// Warning: Mail grande\nconst mailBytes = sizeToBytes(mail);\nif (mailBytes > 2 * 1024 * 1024 * 1024) { // >2GB\n  warnings.push(`📧 Mail: ${mail}`);\n}\n\n// Determinar si necesita atención\nconst needsAttention = issues.length > 0;\nconst needsCleanup = cleanupActions.length > 0;\n\nreturn {\n  cpanelUser: user,\n  totalSize: totalSize,\n  totalGB: totalGB.toFixed(2),\n  issues: issues,\n  warnings: warnings,\n  needsAttention: needsAttention,\n  needsCleanup: needsCleanup,\n  cleanupActions: cleanupActions,\n  filesToClean: {\n    logs: logsToClean,\n    dumps: dumpsToClean,\n    backups: backupsToDelete\n  },\n  details: {\n    largeLogs: largeLogsList,\n    largeFiles: largeFilesList,\n    backups: backupsList,\n    dbDumps: dbDumpsList,\n    wpUploads: wpUploads,\n    drupalFiles: drupalFiles,\n    accessLogs: accessLogs,\n    mail: mail\n  },\n  rawOutput: stdout\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        352
+      ],
+      "id": "process-analysis-node",
+      "name": "Process Disk Analysis"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generar el script de limpieza dinámicamente con medidas de seguridad\nconst user = $input.first().json.cpanelUser;\nconst filesToClean = $input.first().json.filesToClean;\n\n// SEGURIDAD: Función para sanitizar paths y prevenir inyección de comandos\nfunction sanitizePath(path) {\n  if (!path || typeof path !== 'string') return '';\n  \n  // Eliminar caracteres peligrosos para bash\n  return path\n    .replace(/\\\\/g, '\\\\\\\\')   // Backslash primero\n    .replace(/\"/g, '\\\\\"')     // Comillas dobles\n    .replace(/'/g, \"\\\\'\")     // Comillas simples  \n    .replace(/`/g, '\\\\`')      // Backticks (command substitution)\n    .replace(/\\$/g, '\\\\$')     // Variables\n    .replace(/!/g, '\\\\!')      // History expansion\n    .replace(/;/g, '\\\\;')      // Command separator\n    .replace(/&/g, '\\\\&')      // Background/AND\n    .replace(/\\|/g, '\\\\|')     // Pipe\n    .replace(/>/g, '\\\\>')      // Redirection\n    .replace(/</g, '\\\\<')      // Redirection\n    .replace(/\\(/g, '\\\\(')     // Subshell\n    .replace(/\\)/g, '\\\\)')     // Subshell\n    .replace(/\\n/g, '')        // Newlines\n    .replace(/\\r/g, '');       // Carriage returns\n}\n\n// SEGURIDAD: Validar que el path esté dentro de /home/ y no sea peligroso\nfunction isPathSafe(path) {\n  if (!path || path === '' || path === '/') return false;\n  if (path.startsWith('/home/') && !path.includes('..')) return true;\n  if (path.startsWith('./')) return true;\n  return false;\n}\n\n// Construir el script bash\nlet script = `# Limpieza automática para ${user}\nUSER=\"${user}\"\nUSER_HOME=\"/home/\\${USER}\"\n\necho \"=== CLEANUP REPORT ===\"\necho \"USER: \\${USER}\"\necho \"\"\n\ncd \"\\${USER_HOME}\" || exit 1\n\nLOGS_COUNT=0\nDUMPS_COUNT=0\nBACKUPS_COUNT=0\n\n# Vaciar logs grandes\necho \"LOGS_CLEANED:\"\n`;\n\n// Agregar comandos para logs\nif (filesToClean.logs && filesToClean.logs.length > 0) {\n  filesToClean.logs.forEach(logPath => {\n    const safePath = sanitizePath(logPath);\n    script += `if [ -f \"${safePath}\" ]; then\n  SIZE_BEFORE=$(du -h \"${safePath}\" 2>/dev/null | awk '{print $1}')\n  > \"${safePath}\"\n  echo \"Vaciado: ${safePath} (era \\${SIZE_BEFORE})\"\n  LOGS_COUNT=$((LOGS_COUNT + 1))\nfi\n`;\n  });\n}\n\nscript += `echo \"LOGS_TOTAL: \\${LOGS_COUNT}\"\necho \"\"\n\n# Eliminar dumps SQL grandes\necho \"DUMPS_DELETED:\"\n`;\n\n// Agregar comandos para dumps\nif (filesToClean.dumps && filesToClean.dumps.length > 0) {\n  filesToClean.dumps.forEach(dumpPath => {\n    const safePath = sanitizePath(dumpPath);\n    // SEGURIDAD: Validar que es un path seguro antes de rm\n    if (isPathSafe(dumpPath)) {\n      script += `if [ -f \"${safePath}\" ] && [ -n \"${safePath}\" ]; then\n  SIZE=$(du -h \"${safePath}\" 2>/dev/null | awk '{print $1}')\n  rm -f \"${safePath}\"\n  echo \"Eliminado: ${safePath} (\\${SIZE})\"\n  DUMPS_COUNT=$((DUMPS_COUNT + 1))\nfi\n`;\n    } else {\n      script += `echo \"SKIP: Path no seguro: ${safePath}\"\n`;\n    }\n  });\n}\n\nscript += `echo \"DUMPS_TOTAL: \\${DUMPS_COUNT}\"\necho \"\"\n\n# Eliminar backups antiguos/redundantes\necho \"BACKUPS_DELETED:\"\n`;\n\n// Agregar comandos para backups\nif (filesToClean.backups && filesToClean.backups.length > 0) {\n  filesToClean.backups.forEach(backupPath => {\n    const safePath = sanitizePath(backupPath);\n    // SEGURIDAD: Validación estricta antes de rm -rf\n    if (isPathSafe(backupPath)) {\n      script += `# Validar path antes de rm -rf\nif [ -d \"${safePath}\" ] || [ -f \"${safePath}\" ]; then\n  # Doble verificación: no vacío, no raíz, dentro de /home\n  if [ -n \"${safePath}\" ] && [ \"${safePath}\" != \"/\" ] && [[ \"${safePath}\" =~ ^\\\\./.*$ ]]; then\n    SIZE=$(du -sh \"${safePath}\" 2>/dev/null | awk '{print $1}')\n    rm -rf \"${safePath}\"\n    echo \"Eliminado: ${safePath} (\\${SIZE})\"\n    BACKUPS_COUNT=$((BACKUPS_COUNT + 1))\n  else\n    echo \"SKIP: Path inválido o peligroso: ${safePath}\"\n  fi\nfi\n`;\n    } else {\n      script += `echo \"SKIP: Path no seguro: ${safePath}\"\n`;\n    }\n  });\n}\n\nscript += `echo \"BACKUPS_TOTAL: \\${BACKUPS_COUNT}\"\necho \"\"\n\necho \"=== CLEANUP COMPLETED ===\"\n`;\n\nreturn {\n  ...$input.first().json,\n  cleanupScript: script\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        560
+      ],
+      "id": "build-cleanup-script-node",
+      "name": "Build Cleanup Script"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ $json.cleanupScript }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        560
+      ],
+      "id": "ssh-cleanup-node",
+      "name": "SSH: Auto Cleanup",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "RpnkLDMZNn3i0YFH",
+          "name": "ssh - bigmomo-1 production - root caution"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parsear el reporte de limpieza\nconst stdout = $input.first().json.stdout || '';\nconst prevData = $('Process Disk Analysis').first().json;\n\n// Extraer counts\nconst logsMatch = stdout.match(/LOGS_TOTAL: (\\d+)/);\nconst dumpsMatch = stdout.match(/DUMPS_TOTAL: (\\d+)/);\nconst backupsMatch = stdout.match(/BACKUPS_TOTAL: (\\d+)/);\n\nconst logsCount = logsMatch ? parseInt(logsMatch[1]) : 0;\nconst dumpsCount = dumpsMatch ? parseInt(dumpsMatch[1]) : 0;\nconst backupsCount = backupsMatch ? parseInt(backupsMatch[1]) : 0;\n\n// Extraer archivos específicos del output\nconst logsCleaned = [];\nconst dumpsDeleted = [];\nconst backupsDeleted = [];\n\n// Parsear sección LOGS_CLEANED\nconst logsSection = stdout.match(/LOGS_CLEANED:[\\s\\S]*?(?=LOGS_TOTAL:)/);\nif (logsSection) {\n  const logLines = logsSection[0].match(/Vaciado: (.+?) \\(era/g);\n  if (logLines) {\n    logLines.forEach(line => {\n      const match = line.match(/Vaciado: (.+?) \\(era/);\n      if (match) logsCleaned.push(match[1]);\n    });\n  }\n}\n\n// Parsear sección DUMPS_DELETED\nconst dumpsSection = stdout.match(/DUMPS_DELETED:[\\s\\S]*?(?=DUMPS_TOTAL:)/);\nif (dumpsSection) {\n  const dumpLines = dumpsSection[0].match(/Eliminado: (.+?) \\(/g);\n  if (dumpLines) {\n    dumpLines.forEach(line => {\n      const match = line.match(/Eliminado: (.+?) \\(/);\n      if (match) dumpsDeleted.push(match[1]);\n    });\n  }\n}\n\n// Parsear sección BACKUPS_DELETED\nconst backupsSection = stdout.match(/BACKUPS_DELETED:[\\s\\S]*?(?=BACKUPS_TOTAL:)/);\nif (backupsSection) {\n  const backupLines = backupsSection[0].match(/Eliminado: (.+?) \\(/g);\n  if (backupLines) {\n    backupLines.forEach(line => {\n      const match = line.match(/Eliminado: (.+?) \\(/);\n      if (match) backupsDeleted.push(match[1]);\n    });\n  }\n}\n\n// Construir lista de items limpiados con detalles\nconst cleanedItems = [];\n\nif (logsCount > 0) {\n  cleanedItems.push(`🗑️ ${logsCount} log(s) vaciado(s):`);\n  logsCleaned.forEach(log => {\n    cleanedItems.push(`   • ${log}`);\n  });\n}\n\nif (dumpsCount > 0) {\n  cleanedItems.push(`💿 ${dumpsCount} dump(s) SQL eliminado(s):`);\n  dumpsDeleted.forEach(dump => {\n    cleanedItems.push(`   • ${dump}`);\n  });\n}\n\nif (backupsCount > 0) {\n  cleanedItems.push(`💾 ${backupsCount} backup(s) eliminado(s):`);\n  backupsDeleted.forEach(backup => {\n    cleanedItems.push(`   • ${backup}`);\n  });\n}\n\nreturn {\n  ...prevData,\n  cleanupReport: stdout,\n  cleanedItems: cleanedItems,\n  cleanupPerformed: cleanedItems.length > 0\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        560
+      ],
+      "id": "parse-cleanup-node",
+      "name": "Parse Cleanup Report"
+    },
+    {
+      "parameters": {
+        "spaceId": "spaces/AAQAs5SDuMQ",
+        "messageUi": {
+          "text": "=🧹 *Limpieza Automática - {{ $json.cpanelUser }}*\n\n{{ $json.cleanedItems.join('\\n') }}\n\n💾 Tamaño total cuenta: {{ $json.totalSize }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        784
+      ],
+      "id": "notify-cleanup-node",
+      "name": "Notify Cleanup (Individual)",
+      "webhookId": "cleanup-notification",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "google service - cristian automomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agregar todos los resultados del análisis\nconst allItems = $input.all();\n\n// Helper para obtener el nombre del usuario de forma robusta\nfunction getUserName(item) {\n  return item.json.cpanelUser || \n         item.json.user || \n         (item.json.details && item.json.details.user) || \n         'unknown';\n}\n\n// Filtrar solo usuarios con problemas o warnings\nconst usersWithIssues = allItems.filter(item => \n  item.json.needsAttention || \n  (item.json.warnings && item.json.warnings.length > 0)\n);\n\n// Usuarios con limpieza realizada\nconst usersWithCleanup = allItems.filter(item => \n  item.json.cleanupPerformed\n);\n\n// Ordenar por tamaño total (mayor a menor)\nusersWithIssues.sort((a, b) => parseFloat(b.json.totalGB || 0) - parseFloat(a.json.totalGB || 0));\n\n// Contar totales\nconst totalUsers = allItems.length;\nconst usersWithProblems = usersWithIssues.length;\nconst usersAutoCleaned = usersWithCleanup.length;\n\n// Calcular espacio total usado\nconst totalSpaceGB = allItems.reduce((sum, item) => sum + parseFloat(item.json.totalGB || 0), 0);\n\nreturn {\n  summary: {\n    totalUsers: totalUsers,\n    usersAnalyzed: totalUsers,\n    usersWithProblems: usersWithProblems,\n    usersAutoCleaned: usersAutoCleaned,\n    totalSpaceGB: totalSpaceGB.toFixed(2),\n    timestamp: new Date().toISOString()\n  },\n  usersWithIssues: usersWithIssues.map(item => ({\n    user: getUserName(item),\n    totalSize: item.json.totalSize,\n    totalGB: item.json.totalGB,\n    issues: item.json.issues,\n    warnings: item.json.warnings,\n    cleanedItems: item.json.cleanedItems || [],\n    details: item.json.details\n  })),\n  usersWithCleanup: usersWithCleanup.map(item => ({\n    user: getUserName(item),\n    cleanedItems: item.json.cleanedItems\n  })),\n  allUsers: allItems.map(item => ({\n    user: getUserName(item),\n    totalSize: item.json.totalSize,\n    totalGB: item.json.totalGB\n  }))\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        176
+      ],
+      "id": "aggregate-results-node",
+      "name": "Aggregate Final Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatear el mensaje final para Google Chat\nconst data = $input.item.json;\nconst summary = data.summary;\nconst usersWithIssues = data.usersWithIssues || [];\nconst usersWithCleanup = data.usersWithCleanup || [];\n\n// Crear mensaje principal\nlet message = `🔍 *Monitorización de Espacio en Disco - WHM*\\n\\n`;\nmessage += `📊 *Resumen:*\\n`;\nmessage += `• Total de usuarios analizados: ${summary.usersAnalyzed}\\n`;\nmessage += `• Usuarios con problemas/warnings: ${summary.usersWithProblems}\\n`;\nmessage += `• Usuarios con limpieza automática: ${summary.usersAutoCleaned}\\n`;\nmessage += `• Espacio total usado: ${summary.totalSpaceGB} GB\\n`;\nmessage += `• Fecha: ${new Date(summary.timestamp).toLocaleString('es-ES')}\\n\\n`;\n\nif (usersWithCleanup.length > 0) {\n  message += `🧹 *Limpiezas Automáticas Realizadas:*\\n`;\n  usersWithCleanup.forEach((userInfo, index) => {\n    message += `${index + 1}. *${userInfo.user}*: ${userInfo.cleanedItems.join(', ')}\\n`;\n  });\n  message += `\\n`;\n}\n\nif (usersWithIssues.length === 0) {\n  message += `✅ *¡Todo OK!* No se detectaron problemas adicionales.\\n`;\n} else {\n  message += `⚠️ *Usuarios que requieren atención:*\\n\\n`;\n  \n  // Mostrar hasta 10 usuarios con más problemas\n  const topUsers = usersWithIssues.slice(0, 10);\n  \n  topUsers.forEach((userInfo, index) => {\n    message += `*${index + 1}. ${userInfo.user}* (${userInfo.totalSize})\\n`;\n    \n    // Mostrar limpieza realizada si existe\n    if (userInfo.cleanedItems && userInfo.cleanedItems.length > 0) {\n      message += `   ✅ ${userInfo.cleanedItems.join(', ')}\\n`;\n    }\n    \n    // Mostrar issues restantes (filtrar los que ya se resolvieron)\n    if (userInfo.issues && userInfo.issues.length > 0) {\n      userInfo.issues.forEach(issue => {\n        // Filtrar issues que ya fueron resueltos con limpieza\n        if (!issue.includes('se vaciarán') && !issue.includes('se eliminarán')) {\n          message += `   ${issue}\\n`;\n        }\n      });\n    }\n    \n    // Mostrar warnings\n    if (userInfo.warnings && userInfo.warnings.length > 0) {\n      userInfo.warnings.forEach(warning => {\n        message += `   ${warning}\\n`;\n      });\n    }\n    \n    // Detalles específicos de archivos grandes (que requieren revisión manual)\n    if (userInfo.details && userInfo.details.largeFiles && userInfo.details.largeFiles.length > 0) {\n      const topFiles = userInfo.details.largeFiles.slice(0, 2);\n      message += `   📦 Archivos grandes (revisar): ${topFiles.map(f => f.size).join(', ')}\\n`;\n    }\n    \n    message += `\\n`;\n  });\n  \n  if (usersWithIssues.length > 10) {\n    message += `... y ${usersWithIssues.length - 10} usuario(s) más con problemas.\\n`;\n  }\n}\n\nmessage += `\\n---\\n`;\nmessage += `💡 *Recomendaciones:*\\n`;\nmessage += `• ✅ Logs grandes y dumps SQL: limpiados automáticamente\\n`;\nmessage += `• ✅ Backups redundantes: eliminados automáticamente\\n`;\nmessage += `• ⚠️ Archivos grandes: revisar manualmente si son necesarios\\n`;\nmessage += `• ⚠️ Uploads de WordPress/Drupal grandes: optimizar si es necesario\\n`;\n\nreturn {\n  message: message,\n  summary: summary,\n  hasActivity: usersWithIssues.length > 0 || usersWithCleanup.length > 0\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        176
+      ],
+      "id": "format-final-report-node",
+      "name": "Format Final Report"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-has-activity",
+              "leftValue": "={{ $json.hasActivity }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        176
+      ],
+      "id": "filter-has-activity-node",
+      "name": "Filter: Has Activity to Report"
+    },
+    {
+      "parameters": {
+        "spaceId": "spaces/AAQAs5SDuMQ",
+        "messageUi": {
+          "text": "={{ $json.message }}"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleChat",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        176
+      ],
+      "id": "send-final-report-node",
+      "name": "Send Final Report to Chat",
+      "webhookId": "final-report-notification",
+      "credentials": {
+        "googleApi": {
+          "id": "KsbkO5Zn2sEeZIHn",
+          "name": "google service - cristian automomo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b6ed276f-867d-4ee7-93e5-be9aace53a47",
+              "leftValue": "={{ $json.needsCleanup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        576
+      ],
+      "id": "c6933d2f-dff6-4280-b60f-7745f10426c5",
+      "name": "Filter: Needs Cleanup"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bc9606cb-1822-452e-9088-9413160ef8ed",
+              "leftValue": "={{ $json.cleanupPerformed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        784
+      ],
+      "id": "16b35b78-0542-4c38-84ae-e5b26139347e",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "SSH: Get cPanel Users (Root Only)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH: Get cPanel Users (Root Only)": {
+      "main": [
+        [
+          {
+            "node": "Parse Users List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Users List": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Users": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Final Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SSH: Analyze User Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH: Analyze User Disk": {
+      "main": [
+        [
+          {
+            "node": "Process Disk Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Disk Analysis": {
+      "main": [
+        [
+          {
+            "node": "Filter: Needs Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cleanup Script": {
+      "main": [
+        [
+          {
+            "node": "SSH: Auto Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH: Auto Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Parse Cleanup Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Cleanup Report": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Cleanup (Individual)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Aggregate Final Results": {
+      "main": [
+        [
+          {
+            "node": "Format Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Report": {
+      "main": [
+        [
+          {
+            "node": "Filter: Has Activity to Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Has Activity to Report": {
+      "main": [
+        [
+          {
+            "node": "Send Final Report to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Needs Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Build Cleanup Script",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Notify Cleanup (Individual)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Users",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "7a0fd31c-93df-49f7-874a-15858ab01542",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-13T22:00:12.086Z",
+      "createdAt": "2025-11-13T22:00:12.086Z",
+      "role": "workflow:owner",
+      "workflowId": "m5EFoCSOTPmTscTD",
+      "projectId": "rGXkia6aVrtkTfUq"
+    }
+  ],
+  "tags": []
+}
