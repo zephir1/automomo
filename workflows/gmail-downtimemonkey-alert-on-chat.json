@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-06T10:13:28.000Z",
+  "updatedAt": "2025-11-14T11:46:31.000Z",
   "createdAt": "2025-10-24T09:37:32.422Z",
   "id": "EXlYE3246NzjH9r9",
   "name": "gmail - downtimemonkey alert on chat",
@@ -76,7 +76,7 @@
         "operation": "getAll",
         "returnAll": true,
         "filters": {
-          "sender": "monitor@downtimemonkey.com"
+          "q": "from:monitor@downtimemonkey.com OR from:alert@uptimerobot.com"
         }
       },
       "type": "n8n-nodes-base.gmail",
@@ -169,10 +169,10 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "saveDataSuccessExecution": "none",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
-    "timeSavedPerExecution": 1
+    "timeSavedPerExecution": 5,
+    "saveDataSuccessExecution": "none"
   },
   "staticData": {
     "node:Gmail Trigger": {
@@ -186,7 +186,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6c36611a-130f-4fa3-b389-83bbaf9caf9a",
+  "versionId": "e46c81a8-1be7-4c25-9ce3-d42de1588958",
   "triggerCount": 1,
   "shared": [
     {
