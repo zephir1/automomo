@@ -82,9 +82,13 @@ def sync_workflows_to_git():
         if 'staticData' in full_workflow and isinstance(full_workflow['staticData'], dict):
             for node_key, node_data in full_workflow['staticData'].items():
                 if isinstance(node_data, dict):
+                    # Remove from direct node level (e.g., Calendar nodes)
+                    node_data.pop('lastTimeChecked', None)
+                    node_data.pop('possibleDuplicates', None)
+                    
+                    # Remove from nested trigger level (e.g., Gmail Trigger)
                     for trigger_key, trigger_data in node_data.items():
                         if isinstance(trigger_data, dict):
-                            # Remove lastTimeChecked and possibleDuplicates
                             trigger_data.pop('lastTimeChecked', None)
                             trigger_data.pop('possibleDuplicates', None)
         
